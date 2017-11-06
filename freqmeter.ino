@@ -42,8 +42,8 @@
 
 
 #define TASK_DELAY_LOG 20
-#define TASK_DELAY_DISP 20
-#define TASK_DELAY_MPU 3
+#define TASK_DELAY_DISP 200
+#define TASK_DELAY_MPU 1
 
 /*
 #define WHITE 0xFFFF
@@ -66,8 +66,8 @@ static void vSerialOutTask(void *pvParameters) {
 static void vDispOutTask(void *pvParameters) {
     //tft.drawString("Task started!",20,20,4);
     for (;;) {
-       xLogger.Process();
-       vTaskDelay(TASK_DELAY_LOG);
+       xDisplay.Process();
+       vTaskDelay(TASK_DELAY_DISP);
     }
 }
 
