@@ -12,6 +12,8 @@
 #define DISPLAY_DC  PA1
 #define DISPLAY_RST PA4
 
+#define DISPLAY_LEN_S4  16
+
 Adafruit_ILI9341_STM tft = Adafruit_ILI9341_STM( DISPLAY_CS, DISPLAY_DC, DISPLAY_RST);       // Invoke custom library
 
 void Display::Init() {
@@ -25,6 +27,8 @@ void Display::Init() {
     tft.fillScreen(ILI9341_BLACK);  
     tft.setTextSize(1);
     tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
+
+    /*
     tft.drawCentreString("HELLO",160,48,2); // Next size up font 2
 
     vSemaphoreCreateBinary(xDispFree);
@@ -45,116 +49,36 @@ void Display::Init() {
 
     txMessage.ucMessageID=0;
     txMessage.ucData[0]=0;
-    
-    tft.drawString("DISP OK",20,20,4);
+    */
+
+    tft.drawString("DISP OK",160,48,2);
+
+    ShowStatus("0123456789abcdef");
+}
+
+
+void Display::ShowStatus(const char *msg) {    
+    strncpy(out_buf, msg, DISPLAY_LEN_S4);
+    out_buf[DISPLAY_LEN_S4-1] = 0;
+    BufLen();
+    tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
+    tft.drawString(out_buf,20,20,4);
 }
 
 /*
-void ComLogger::vAddLogMsg(const char *pucMsg) {  
-  if ( xSemaphoreTake( xLogFree, ( portTickType ) 10 ) == pdTRUE )
-    {
-      txMessage.ucMessageID++;     
-      if(pucMsg) 
-        strncpy(txMessage.ucData, pucMsg, CLOG_MSG_SZ);          
-      else *txMessage.ucData=0;  
-      xQueueSendToBack( xLogQueue, ( void * ) &txMessage, ( TickType_t ) 0 );          
-      xSemaphoreGive( xLogFree );
-    }
-}
-
-void ComLogger::vAddLogMsg(const char *pucMsg, int16_t i) {  
-   if ( xSemaphoreTake( xLogFree, ( portTickType ) 10 ) == pdTRUE )
-    {
-      txMessage.ucMessageID++;     
-      if(pucMsg) 
-        strncpy(txMessage.ucData, pucMsg, CLOG_MSG_SZ);          
-      else *txMessage.ucData=0;        
-      strncat(txMessage.ucData, ":", CLOG_MSG_SZ);          
-      itoa_cat(i, txMessage.ucData);
-      xQueueSendToBack( xLogQueue, ( void * ) &txMessage, ( TickType_t ) 0 );          
-      xSemaphoreGive( xLogFree );
-    }
-}
-
-void ComLogger::vAddLogMsg(const char *pucMsg1, int16_t i1, const char *pucMsg2, int16_t i2) {  
-   if ( xSemaphoreTake( xLogFree, ( portTickType ) 10 ) == pdTRUE )
-    {
-      txMessage.ucMessageID++;     
-      if(pucMsg1) 
-        strncpy(txMessage.ucData, pucMsg1, CLOG_MSG_SZ);          
-      else *txMessage.ucData=0;  
-      strncat(txMessage.ucData, ":", CLOG_MSG_SZ);          
-      itoa_cat(i1, txMessage.ucData);
-      if(pucMsg2) {
-        strncat(txMessage.ucData, ",", CLOG_MSG_SZ);                
-        strncat(txMessage.ucData, pucMsg2, CLOG_MSG_SZ);          
-      }
-      strncat(txMessage.ucData, ":", CLOG_MSG_SZ);          
-      itoa_cat(i2, txMessage.ucData);
-      
-      xQueueSendToBack( xLogQueue, ( void * ) &txMessage, ( TickType_t ) 0 );          
-      xSemaphoreGive( xLogFree );
-    }
-}
-
-
-void ComLogger::vAddLogMsg(const char *pucMsg1, int32_t i1, int32_t i2, int32_t i3) {
-   if ( xSemaphoreTake( xLogFree, ( portTickType ) 10 ) == pdTRUE )
-    {
-      txMessage.ucMessageID++;     
-      if(pucMsg1) 
-        strncpy(txMessage.ucData, pucMsg1, CLOG_MSG_SZ);          
-      else *txMessage.ucData=0;  
-      strncat(txMessage.ucData, ":", CLOG_MSG_SZ);          
-      ltoa_cat(i1, txMessage.ucData);
-      strncat(txMessage.ucData, ",", CLOG_MSG_SZ);          
-      ltoa_cat(i2, txMessage.ucData);
-      strncat(txMessage.ucData, ",", CLOG_MSG_SZ);          
-      ltoa_cat(i3, txMessage.ucData);
-      
-      xQueueSendToBack( xLogQueue, ( void * ) &txMessage, ( TickType_t ) 0 );          
-      xSemaphoreGive( xLogFree );
-    }
-}
-
-void ComLogger::vAddLogMsg(const char *pucMsg1, int32_t i1, int32_t i2, int32_t i3, int32_t i4) {
-   if ( xSemaphoreTake( xLogFree, ( portTickType ) 10 ) == pdTRUE )
-    {
-      txMessage.ucMessageID++;     
-      if(pucMsg1) 
-        strncpy(txMessage.ucData, pucMsg1, CLOG_MSG_SZ);          
-      else *txMessage.ucData=0;  
-      strncat(txMessage.ucData, ":", CLOG_MSG_SZ);          
-      ltoa_cat(i1, txMessage.ucData);
-      strncat(txMessage.ucData, ",", CLOG_MSG_SZ);          
-      ltoa_cat(i2, txMessage.ucData);
-      strncat(txMessage.ucData, ",", CLOG_MSG_SZ);          
-      ltoa_cat(i3, txMessage.ucData);
-      strncat(txMessage.ucData, ",", CLOG_MSG_SZ);          
-      ltoa_cat(i4, txMessage.ucData);      
-      xQueueSendToBack( xLogQueue, ( void * ) &txMessage, ( TickType_t ) 0 );          
-      xSemaphoreGive( xLogFree );
-    }
-}
-
-*/
-
 static int c=0;
 void Display::Process() { 
-  
-  /*
-
-  if( xQueueReceive( xLogQueue, &rxMessage, ( TickType_t ) 10 ) )
-  {
-    Serial.print((int)rxMessage.ucMessageID);
-    Serial.print(" : ");
-    Serial.println(rxMessage.ucData);
-    vTaskDelay(100);         
-   }       
-   */
    strcpy(out_buf, "PROC : ");          
    itoa_cat(c++, out_buf);
    tft.drawCentreString(out_buf,160,48,2); // Next size up font 2
 }
+*/
 
-
+void Display::BufLen() {
+  int len = strlen(out_buf);
+  while(len<DISPLAY_LEN_S4-1) {
+    out_buf[len]=' ';
+    len++;    
+  }
+  out_buf[len] = 0;
+}

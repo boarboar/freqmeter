@@ -32,6 +32,7 @@
 
 #define BOARD_LED_PIN PC13
 
+/*
 // PWM ports (check!)
 #define DISPLAY_LED PA2 
 
@@ -40,20 +41,17 @@
 #define DISPLAY_DC  PA1
 #define DISPLAY_RST PA4
 
+*/
 
 #define TASK_DELAY_LOG 20
 #define TASK_DELAY_DISP 200
-#define TASK_DELAY_MPU 1
+#define TASK_DELAY_MPU 1   // 1kHz
 
-/*
-#define WHITE 0xFFFF
-#define BLACK 0x0000
-#define RED 0xF800
-*/
 
 Display xDisplay;
 ComLogger xLogger;
-//Adafruit_ILI9341_STM tft = Adafruit_ILI9341_STM( DISPLAY_CS, DISPLAY_DC, DISPLAY_RST);  
+
+boolean fMPUReady=false;
 
 static void vSerialOutTask(void *pvParameters) {
     Serial.println("Serial Out Task started.");
@@ -66,7 +64,16 @@ static void vSerialOutTask(void *pvParameters) {
 static void vDispOutTask(void *pvParameters) {
     //tft.drawString("Task started!",20,20,4);
     for (;;) {
-       xDisplay.Process();
+        if(fMPUReady) {
+            if(MpuDrv::Mpu.Acquire()) {
+                // do something
+                xDisplay.ShowStatus("Ready!");
+                MpuDrv::Mpu.Release();
+            } 
+        }
+        else {                        
+            xDisplay.ShowStatus("Warm up...");
+        }
        vTaskDelay(TASK_DELAY_DISP);
     }
 }
@@ -82,6 +89,7 @@ static void vIMU_Task(void *pvParameters) {
       } else continue;
       if(mpu_res==2) {
         // IMU settled
+        fMPUReady=true;
         xLogger.vAddLogMsg("MPU Ready!");
       }
     }

@@ -1,6 +1,8 @@
 
+/*
 #define CLOG_MSG_SZ 80
 #define CLOG_Q_SZ 16
+*/
 
 class Display {  
   public:
@@ -13,9 +15,12 @@ class Display {
     void vAddLogMsg(const char *pucMsg1, int32_t i1, int32_t i2, int32_t i3);
     void vAddLogMsg(const char *pucMsg1, int32_t i1, int32_t i2, int32_t i3, int32_t i4);
     */
-    void Process();
+    //void Process();
+    void ShowStatus(const char *msg);
   protected:
-    char out_buf[256];
+    void BufLen();
+    char out_buf[128];
+    /*
   struct AMessage
   {
     char ucMessageID;
@@ -25,6 +30,7 @@ class Display {
   struct AMessage rxMessage;
   QueueHandle_t xDispQueue;
   xSemaphoreHandle xDispFree;
+  */
 };
 
 

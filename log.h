@@ -1,6 +1,6 @@
 
-#define CLOG_MSG_SZ 80
-#define CLOG_Q_SZ 16
+#define CLOG_MSG_SZ 64
+#define CLOG_Q_SZ 8
 
 class ComLogger {  
   public:
