@@ -17,6 +17,7 @@ class Display {
     */
     //void Process();
     void ShowStatus(const char *msg);
+    void ShowData3(const int16_t d[3]);
   protected:
     void BufLen();
     char out_buf[128];

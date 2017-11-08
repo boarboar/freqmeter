@@ -290,6 +290,12 @@ void MpuDrv::flushAlarms() {
   
 float MpuDrv::getYaw() { return ypr[0]; }
 
+void MpuDrv::getRawAccel(int16_t a[3]) {
+   a[0]=aa16.x; 
+   a[1]=aa16.y;
+   a[2]=aa16.z;
+  }
+
 void MpuDrv::getAll(float* ypr, float* af, float* vf) {        
   ypr[0]=this->ypr[0]; ypr[1]=this->ypr[1]; ypr[2]=this->ypr[2];
   af[0]=a.x; af[1]=a.y; af[2]=a.z;

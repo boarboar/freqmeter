@@ -14,6 +14,8 @@
 
 #define DISPLAY_LEN_S4  16
 
+extern ComLogger xLogger;
+
 Adafruit_ILI9341_STM tft = Adafruit_ILI9341_STM( DISPLAY_CS, DISPLAY_DC, DISPLAY_RST);       // Invoke custom library
 
 void Display::Init() {
@@ -54,15 +56,39 @@ void Display::Init() {
     tft.drawString("DISP OK",160,48,2);
 
     ShowStatus("0123456789abcdef");
+
+    // test space filling    
+    ShowStatus("xyz");
+
+    Serial.print(out_buf); Serial.println('|');
+    //xLogger.vAddLogMsg(out_buf, 0);
+    BufLen();
+    Serial.print(out_buf); Serial.println('|');
+    //xLogger.vAddLogMsg(out_buf, 1);
+
 }
 
 
 void Display::ShowStatus(const char *msg) {    
     strncpy(out_buf, msg, DISPLAY_LEN_S4);
     out_buf[DISPLAY_LEN_S4-1] = 0;
-    BufLen();
+    //BufLen();
     tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
-    tft.drawString(out_buf,20,20,4);
+    tft.fillRect(0, 20, 240, 20, ILI9341_BLACK);
+    tft.drawString(out_buf,0,20,4);
+
+
+}
+
+void Display::ShowData3(const int16_t d[3]) {
+    itoa(d[0], out_buf);
+    strcat(out_buf, " ");
+    itoa_cat(d[1], out_buf);
+    strcat(out_buf, " ");
+    itoa_cat(d[2], out_buf);
+    tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
+    tft.fillRect(0, 20, 240, 26, ILI9341_BLACK);
+    tft.drawString(out_buf,0,20,4);
 }
 
 /*

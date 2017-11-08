@@ -41,6 +41,7 @@ public:
   void copyAlarms();
   void flushAlarms();
   float getYaw();
+  void  getRawAccel(int16_t a[3]);
 protected:  
   MpuDrv();
   // MPU control/status vars

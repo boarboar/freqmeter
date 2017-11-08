@@ -63,11 +63,13 @@ static void vSerialOutTask(void *pvParameters) {
 
 static void vDispOutTask(void *pvParameters) {
     //tft.drawString("Task started!",20,20,4);
+    int16_t a[3];
     for (;;) {
         if(fMPUReady) {
             if(MpuDrv::Mpu.Acquire()) {
-                // do something
-                xDisplay.ShowStatus("Ready!");
+                MpuDrv::Mpu.getRawAccel(a);
+                //xDisplay.ShowStatus("Ready!");
+                xDisplay.ShowData3(a);
                 MpuDrv::Mpu.Release();
             } 
         }
