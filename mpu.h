@@ -36,12 +36,14 @@ public:
   uint8_t isNeedReset();
   void needReset();
   void getAll(float* ypr, float* af, float* vf);  
-  void resetIntegrator();
-  void process();
+  //void resetIntegrator();
+  //void process();
   void copyAlarms();
   void flushAlarms();
-  float getYaw();
+  //float getYaw();
   void  getRawAccel(int16_t a[3]);
+  void  getRawAccelMax(int16_t a[3]);
+  void  getRawAccelDelta(int16_t da[3]);
 protected:  
   MpuDrv();
   // MPU control/status vars
@@ -62,12 +64,12 @@ protected:
   VectorInt16 aa16;          // [x, y, z]            accel sensor measurements
   int16_t q16_0[4];         // [w, x, y, z]         quaternion container (int 16) - prev/base
   VectorInt16 aa16_0;          // [x, y, z]            accel sensor measurements - prev/base
+  VectorInt16 aa16_max;          // [x, y, z]            accel sensor measurements - prev/base
+  /*
   VectorFloat a0; // base world accel
   VectorFloat a;
   VectorFloat v;
   float ypr[3];
-  /*
-  volatile uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
   */
   xSemaphoreHandle xIMUFree;
   TickType_t xLastWakeTime, xStart;

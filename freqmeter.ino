@@ -67,10 +67,19 @@ static void vDispOutTask(void *pvParameters) {
     for (;;) {
         if(fMPUReady) {
             if(MpuDrv::Mpu.Acquire()) {
-                MpuDrv::Mpu.getRawAccel(a);
-                //xDisplay.ShowStatus("Ready!");
-                xDisplay.ShowData3(a);
+                MpuDrv::Mpu.getRawAccel(a);                
                 MpuDrv::Mpu.Release();
+                xDisplay.ShowData3(a, 0);
+            } 
+            if(MpuDrv::Mpu.Acquire()) {
+                MpuDrv::Mpu.getRawAccelDelta(a);                
+                MpuDrv::Mpu.Release();
+                xDisplay.ShowData3(a, 1);
+            } 
+            if(MpuDrv::Mpu.Acquire()) {
+                MpuDrv::Mpu.getRawAccelMax(a);                
+                MpuDrv::Mpu.Release();
+                xDisplay.ShowData3(a, 2);
             } 
         }
         else {                        

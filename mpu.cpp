@@ -54,8 +54,10 @@ int16_t MpuDrv::init() {
   conv_count=0;
   need_reset=0;
 
+  aa16_max.x=aa16_max.y=aa16_max.z=0;
+
   for(int i=0; i<MPU_FAIL_CNT_SZ; i++) fail_cnt[i]=0;
-  resetIntegrator();
+  //resetIntegrator();
   xLogger.vAddLogMsg("Init I2C dev...");
    
   mpu.initialize();
@@ -209,50 +211,17 @@ int16_t MpuDrv::cycle(uint16_t /*dt*/) {
   count++; 
   
   if(dmpStatus==ST_READY) {
-     //uint32_t mcs=micros();
-     /*
-#ifdef IMU_USE_INTEGRATION    
-    // =======actually, this is not needed if we do not use IMU accel-based integration integration
-    // integrate motion
-    Quaternion q, q0;
-    VectorFloat ga;    
-    VectorInt16 aaReal, aaWorld;
-    
-    float ts;
-    // get world frame accel (with adjustment) - needed for V-integration
-    mpu.dmpGetQuaternion(&q, q16);
-    mpu.dmpGetQuaternion(&q0, q16_0);
-    q0=q0.getConjugate();
-    q=q0.getProduct(q); // real quaternion (relative to base)
-    mpu.dmpGetGravity(&ga, &q);
-    mpu.dmpGetLinearAccel(&aaReal, &aa16, &ga);
-    mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);      
-    //a.x=aaWorld.x*G_SCALE; a.y=aaWorld.y*G_SCALE; a.z=aaWorld.z*G_SCALE;      
-    ga.x=aaWorld.x*G_SCALE; ga.y=aaWorld.y*G_SCALE; ga.z=aaWorld.z*G_SCALE;      
-    if(settled) { // first time only - store base accel
-      //a0=a;
-      a0=ga;
-      DbgPrintVectorFloat("A Base (m/s^2)\t", &a0);
-    }      
-    // adjust to base accel
-    //a.x-=a0.x; a.y-=a0.y; a.z-=a0.z;
-    ga.x-=a0.x; ga.y-=a0.y; ga.z-=a0.z;
-    // low-pass filter for acceleration
-    a.x = a.x - A_K * (a.x - ga.x);
-    a.y = a.y - A_K * (a.y - ga.y);
-    a.z = a.z - A_K * (a.z - ga.z);
-    ts=(float)(micros()-start)/1000000.0f;
-    v.x+=a.x*ts; v.y+=a.y*ts; v.z+=a.z*ts;
-//      r.x+=v.x*ts; r.y+=v.y*ts; r.z+=v.z*ts;
-#endif
-*/
-    //start=mcs;
     data_ready=1; 
+    aa16_0 = aa16; // always
+    if(aa16.x > aa16_max.x) aa16_max.x=aa16.x;
+    if(aa16.y > aa16_max.y) aa16_max.y=aa16.y;
+    if(aa16.z > aa16_max.z) aa16_max.z=aa16.z;
     return settled ? 2 : 1;
   }      
   return 10;
 }
 
+/*
 void MpuDrv::resetIntegrator() {
   a.x=a.y=a.z=0.0f;
   v.x=v.y=v.z=0.0f;  
@@ -270,6 +239,7 @@ void MpuDrv::process() {
   mpu.dmpGetGravity(&gravity, &q);
   mpu.dmpGetYawPitchRoll(ypr, &q, &gravity); 
 }
+*/
 
 void MpuDrv::copyAlarms() {
   //copy alarms for flushing
@@ -288,7 +258,7 @@ void MpuDrv::flushAlarms() {
   }
 }
   
-float MpuDrv::getYaw() { return ypr[0]; }
+// float MpuDrv::getYaw() { return ypr[0]; }
 
 void MpuDrv::getRawAccel(int16_t a[3]) {
    a[0]=aa16.x; 
@@ -296,9 +266,23 @@ void MpuDrv::getRawAccel(int16_t a[3]) {
    a[2]=aa16.z;
   }
 
+void MpuDrv::getRawAccelMax(int16_t a[3]) {
+  a[0]=aa16_max.x; 
+  a[1]=aa16_max.y;
+  a[2]=aa16_max.z;
+  }
+ 
+ 
+void MpuDrv::getRawAccelDelta(int16_t da[3]) {
+  da[0]=aa16.x-aa16_0.x; 
+  da[1]=aa16.y-aa16_0.y;
+  da[2]=aa16.z-aa16_0.z;
+  }
+
+  /*
 void MpuDrv::getAll(float* ypr, float* af, float* vf) {        
   ypr[0]=this->ypr[0]; ypr[1]=this->ypr[1]; ypr[2]=this->ypr[2];
   af[0]=a.x; af[1]=a.y; af[2]=a.z;
   vf[0]=v.x; vf[1]=v.y; vf[2]=v.z;
 }  
-
+*/

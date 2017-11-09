@@ -17,10 +17,10 @@ class Display {
     */
     //void Process();
     void ShowStatus(const char *msg);
-    void ShowData3(const int16_t d[3]);
+    void ShowData3(const int16_t d[3], int row=0);
   protected:
     void BufLen();
-    char out_buf[128];
+    char out_buf[64];
     /*
   struct AMessage
   {

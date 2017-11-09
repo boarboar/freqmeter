@@ -53,19 +53,9 @@ void Display::Init() {
     txMessage.ucData[0]=0;
     */
 
-    tft.drawString("DISP OK",160,48,2);
+    //tft.drawString("DISP OK",160,48,2);
 
     ShowStatus("0123456789abcdef");
-
-    // test space filling    
-    ShowStatus("xyz");
-
-    Serial.print(out_buf); Serial.println('|');
-    //xLogger.vAddLogMsg(out_buf, 0);
-    BufLen();
-    Serial.print(out_buf); Serial.println('|');
-    //xLogger.vAddLogMsg(out_buf, 1);
-
 }
 
 
@@ -80,15 +70,17 @@ void Display::ShowStatus(const char *msg) {
 
 }
 
-void Display::ShowData3(const int16_t d[3]) {
+void Display::ShowData3(const int16_t d[3], int row) {
+    const int D_FONT_SZ = 4;
+    const int D_FONT_H = 26;
     itoa(d[0], out_buf);
     strcat(out_buf, " ");
     itoa_cat(d[1], out_buf);
     strcat(out_buf, " ");
     itoa_cat(d[2], out_buf);
     tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
-    tft.fillRect(0, 20, 240, 26, ILI9341_BLACK);
-    tft.drawString(out_buf,0,20,4);
+    tft.fillRect(0, row*D_FONT_H, 240, D_FONT_H, ILI9341_BLACK);
+    tft.drawString(out_buf,0,row*D_FONT_H, D_FONT_SZ);
 }
 
 /*
