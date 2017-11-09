@@ -65,6 +65,7 @@ protected:
   int16_t q16_0[4];         // [w, x, y, z]         quaternion container (int 16) - prev/base
   VectorInt16 aa16_0;          // [x, y, z]            accel sensor measurements - prev/base
   VectorInt16 aa16_max;          // [x, y, z]            accel sensor measurements - prev/base
+  VectorInt16 daa16;          // [x, y, z]
   /*
   VectorFloat a0; // base world accel
   VectorFloat a;

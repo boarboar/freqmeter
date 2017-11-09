@@ -47,7 +47,6 @@
 #define TASK_DELAY_DISP 200
 #define TASK_DELAY_MPU 1   // 1kHz
 
-
 Display xDisplay;
 ComLogger xLogger;
 
@@ -71,11 +70,13 @@ static void vDispOutTask(void *pvParameters) {
                 MpuDrv::Mpu.Release();
                 xDisplay.ShowData3(a, 0);
             } 
+            vTaskDelay(1);
             if(MpuDrv::Mpu.Acquire()) {
                 MpuDrv::Mpu.getRawAccelDelta(a);                
                 MpuDrv::Mpu.Release();
                 xDisplay.ShowData3(a, 1);
             } 
+            vTaskDelay(1);
             if(MpuDrv::Mpu.Acquire()) {
                 MpuDrv::Mpu.getRawAccelMax(a);                
                 MpuDrv::Mpu.Release();

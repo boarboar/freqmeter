@@ -212,6 +212,9 @@ int16_t MpuDrv::cycle(uint16_t /*dt*/) {
   
   if(dmpStatus==ST_READY) {
     data_ready=1; 
+    daa16.x=aa16.x-aa16_0.x;
+    daa16.y=aa16.y-aa16_0.y;
+    daa16.z=aa16.z-aa16_0.z;
     aa16_0 = aa16; // always
     if(aa16.x > aa16_max.x) aa16_max.x=aa16.x;
     if(aa16.y > aa16_max.y) aa16_max.y=aa16.y;
@@ -274,9 +277,9 @@ void MpuDrv::getRawAccelMax(int16_t a[3]) {
  
  
 void MpuDrv::getRawAccelDelta(int16_t da[3]) {
-  da[0]=aa16.x-aa16_0.x; 
-  da[1]=aa16.y-aa16_0.y;
-  da[2]=aa16.z-aa16_0.z;
+   da[0]=daa16.x; 
+   da[1]=daa16.y;
+   da[2]=daa16.z;
   }
 
   /*
