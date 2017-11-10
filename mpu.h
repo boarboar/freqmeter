@@ -22,6 +22,10 @@ class MpuDrv {
   //enum FailReason {MPU_FAIL_NONE=0, MPU_FAIL_INIT=1, MPU_FAIL_NODATA=2, MPU_FAIL_FIFOOVFL=3, MPU_FAIL_FIFOTMO=4, MPU_FAIL_FIFOEXCESS=5, MPU_FAIL_CONVTMO=6, MPU_FAIL_INIT_OK=128};
   enum FailReason {MPU_FAIL_NONE=0, MPU_FAIL_INIT=1,  MPU_FAIL_CONVTMO=2, MPU_FAIL_CYCLE=3, MPU_EVENT_CONV_PROG=16, MPU_FAIL_INIT_OK=128};
   enum FailCountIdx { MPU_FAIL_NODATA_IDX=0, MPU_FAIL_FIFOOVFL_IDX=1, MPU_FAIL_FIFOTMO_IDX=2, MPU_FAIL_FIFOEXCESS_IDX=3 };
+  // FFT
+  //static const uint16_t FFT_SAMPLES = 64; //This value MUST ALWAYS be a power of 2
+  // with sampling at 1000 Hz, we get width 1000/2 = 500 Hz
+  // discrete of (1000/2) / (64/2) = 500/32 = 15 Hz
 public:
   static MpuDrv Mpu; // singleton  
   //int16_t init(/*uint16_t sda, uint16_t sdl,*/ uint16_t intr);
@@ -42,8 +46,14 @@ public:
   void flushAlarms();
   //float getYaw();
   void  getRawAccel(int16_t a[3]);
-  void  getRawAccelMax(int16_t a[3]);
-  void  getRawAccelDelta(int16_t da[3]);
+  //void  getRawAccelMax(int16_t a[3]);
+  void  getAccel(int16_t a[3]);
+
+  void FFT_SetSampling(double *dSamples, int8_t n);
+  void FFT_StartSampling(); 
+  //boolean FFT_SamplingReady(int16_t *dst=NULL, int32_t sz=0);
+  boolean FFT_SamplingReady();
+
 protected:  
   MpuDrv();
   // MPU control/status vars
@@ -64,14 +74,21 @@ protected:
   VectorInt16 aa16;          // [x, y, z]            accel sensor measurements
   int16_t q16_0[4];         // [w, x, y, z]         quaternion container (int 16) - prev/base
   VectorInt16 aa16_0;          // [x, y, z]            accel sensor measurements - prev/base
-  VectorInt16 aa16_max;          // [x, y, z]            accel sensor measurements - prev/base
-  VectorInt16 daa16;          // [x, y, z]
+  //VectorInt16 aa16_max;          // [x, y, z]            accel sensor measurements - max // test only
+  //VectorInt16 daa16;          // [x, y, z]
   /*
   VectorFloat a0; // base world accel
   VectorFloat a;
   VectorFloat v;
   float ypr[3];
   */
+  // FFT
+  //double vReal[FFT_SAMPLES];
+  //double vImag[FFT_SAMPLES];
+
+  int8_t nSample, iSample;
+  double *pdSample;
+  
   xSemaphoreHandle xIMUFree;
   TickType_t xLastWakeTime, xStart;
 };

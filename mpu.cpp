@@ -54,7 +54,12 @@ int16_t MpuDrv::init() {
   conv_count=0;
   need_reset=0;
 
-  aa16_max.x=aa16_max.y=aa16_max.z=0;
+  //aa16_max.x=aa16_max.y=aa16_max.z=0;
+
+  // FFT
+  pdSample=NULL;
+  nSample=0;
+  iSample=0;
 
   for(int i=0; i<MPU_FAIL_CNT_SZ; i++) fail_cnt[i]=0;
   //resetIntegrator();
@@ -212,6 +217,7 @@ int16_t MpuDrv::cycle(uint16_t /*dt*/) {
   
   if(dmpStatus==ST_READY) {
     data_ready=1; 
+    /*
     daa16.x=aa16.x-aa16_0.x;
     daa16.y=aa16.y-aa16_0.y;
     daa16.z=aa16.z-aa16_0.z;
@@ -219,6 +225,22 @@ int16_t MpuDrv::cycle(uint16_t /*dt*/) {
     if(aa16.x > aa16_max.x) aa16_max.x=aa16.x;
     if(aa16.y > aa16_max.y) aa16_max.y=aa16.y;
     if(aa16.z > aa16_max.z) aa16_max.z=aa16.z;
+    */
+    // FFT
+    if(iSample<nSample && pdSample!=NULL) {
+      pdSample[iSample]=aa16.z-aa16_0.z;
+
+      /*
+      pdSample[iSample]=sqrt(
+        (int32_t)(aa16.x-aa16_0.x)*(aa16.x-aa16_0.x)+
+        (int32_t)(aa16.y-aa16_0.y)*(aa16.y-aa16_0.y)+
+        (int32_t)(aa16.z-aa16_0.z)*(aa16.z-aa16_0.z)
+      );
+      */
+
+      //vImag[iSample]=0.0;
+      iSample++;
+    }
     return settled ? 2 : 1;
   }      
   return 10;
@@ -269,18 +291,27 @@ void MpuDrv::getRawAccel(int16_t a[3]) {
    a[2]=aa16.z;
   }
 
+void MpuDrv::getAccel(int16_t a[3]) {
+  a[0]=aa16.x-aa16_0.x; 
+  a[1]=aa16.y-aa16_0.y;
+  a[2]=aa16.z-aa16_0.z;
+  }
+ 
+  /*
 void MpuDrv::getRawAccelMax(int16_t a[3]) {
   a[0]=aa16_max.x; 
   a[1]=aa16_max.y;
   a[2]=aa16_max.z;
   }
- 
- 
+ */
+
+ /*
 void MpuDrv::getRawAccelDelta(int16_t da[3]) {
    da[0]=daa16.x; 
    da[1]=daa16.y;
    da[2]=daa16.z;
   }
+*/
 
   /*
 void MpuDrv::getAll(float* ypr, float* af, float* vf) {        
@@ -288,4 +319,30 @@ void MpuDrv::getAll(float* ypr, float* af, float* vf) {
   af[0]=a.x; af[1]=a.y; af[2]=a.z;
   vf[0]=v.x; vf[1]=v.y; vf[2]=v.z;
 }  
+*/
+
+void  MpuDrv::FFT_SetSampling(double *dSamples, int8_t n) {
+  nSample = n;
+  pdSample = dSamples;
+}
+
+void MpuDrv::FFT_StartSampling() {
+  iSample=0;
+}
+
+boolean MpuDrv::FFT_SamplingReady() {
+  return iSample==nSample;
+}
+
+/*
+boolean MpuDrv::FFT_SamplingReady(int16_t *dst, int32_t sz) {
+  if(iSample!=FFT_SAMPLES) return false;
+  if(dst) {
+    int16_t n=min(FFT_SAMPLES, sz);
+    for(int16_t i=0; i<n; i++) {
+      dst[i]=(int16_t)vReal[i];
+    }
+  }
+  return true;
+}
 */

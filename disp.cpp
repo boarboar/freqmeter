@@ -13,6 +13,8 @@
 #define DISPLAY_RST PA4
 
 #define DISPLAY_LEN_S4  16
+#define DISPLAY_H_SZ  240
+#define DISPLAY_V_SZ  320
 
 extern ComLogger xLogger;
 
@@ -56,6 +58,11 @@ void Display::Init() {
     //tft.drawString("DISP OK",160,48,2);
 
     ShowStatus("0123456789abcdef");
+
+    for(int i=0; i<10; i++) {
+        tft.fillRect(i*7*32, DISPLAY_V_SZ-i*10-1, 6, i*10, ILI9341_RED);
+    }
+
 }
 
 
@@ -79,7 +86,7 @@ void Display::ShowData3(const int16_t d[3], int row) {
     strcat(out_buf, " ");
     itoa_cat(d[2], out_buf);
     tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
-    tft.fillRect(0, row*D_FONT_H, 240, D_FONT_H, ILI9341_BLACK);
+    tft.fillRect(0, row*D_FONT_H, DISPLAY_H_SZ, D_FONT_H, ILI9341_BLACK);
     tft.drawString(out_buf,0,row*D_FONT_H, D_FONT_SZ);
 }
 

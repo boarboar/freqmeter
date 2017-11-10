@@ -43,14 +43,25 @@
 
 */
 
-#define TASK_DELAY_LOG 20
-#define TASK_DELAY_DISP 200
+#define TASK_DELAY_LOG 10
+//#define TASK_DELAY_DISP 200
+#define TASK_DELAY_DISP 10000
 #define TASK_DELAY_MPU 1   // 1kHz
 
 Display xDisplay;
 ComLogger xLogger;
 
 boolean fMPUReady=false;
+
+//int16_t fft_buf[64];
+
+// FFT
+// https://github.com/kosme/arduinoFFT
+static const uint16_t FFT_SAMPLES = 64; //This value MUST ALWAYS be a power of 2
+// with sampling at 1000 Hz, we get width 1000/2 = 500 Hz
+// discrete of (1000/2) / (64/2) = 500/32 = 15 Hz
+double vReal[FFT_SAMPLES];
+double vImag[FFT_SAMPLES];  
 
 static void vSerialOutTask(void *pvParameters) {
     Serial.println("Serial Out Task started.");
@@ -63,25 +74,43 @@ static void vSerialOutTask(void *pvParameters) {
 static void vDispOutTask(void *pvParameters) {
     //tft.drawString("Task started!",20,20,4);
     int16_t a[3];
+    boolean bSampReady=false;
     for (;;) {
         if(fMPUReady) {
             if(MpuDrv::Mpu.Acquire()) {
+                bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
                 MpuDrv::Mpu.getRawAccel(a);                
                 MpuDrv::Mpu.Release();
                 xDisplay.ShowData3(a, 0);
             } 
             vTaskDelay(1);
             if(MpuDrv::Mpu.Acquire()) {
-                MpuDrv::Mpu.getRawAccelDelta(a);                
+                MpuDrv::Mpu.getAccel(a);                
                 MpuDrv::Mpu.Release();
                 xDisplay.ShowData3(a, 1);
             } 
+            /*
             vTaskDelay(1);
             if(MpuDrv::Mpu.Acquire()) {
                 MpuDrv::Mpu.getRawAccelMax(a);                
                 MpuDrv::Mpu.Release();
                 xDisplay.ShowData3(a, 2);
             } 
+            */
+       
+            if(bSampReady) {
+                // there is no sampling at the miment, so we can use the buffer for FFT
+                xLogger.vAddLogMsg("Sampling ready:", FFT_SAMPLES);
+                for(int i=0; i<FFT_SAMPLES; i++) {
+                    xLogger.vAddLogMsg("S", i, "V", (int16_t)vReal[i]);
+                    vTaskDelay(1);                              
+                }
+                if(MpuDrv::Mpu.Acquire()) {
+                    MpuDrv::Mpu.FFT_StartSampling();
+                    MpuDrv::Mpu.Release();                
+                }  
+                
+            }
         }
         else {                        
             xDisplay.ShowStatus("Warm up...");
@@ -96,12 +125,16 @@ static void vIMU_Task(void *pvParameters) {
     for (;;) { 
       vTaskDelay(TASK_DELAY_MPU); 
       if(MpuDrv::Mpu.Acquire()) {
-        mpu_res = MpuDrv::Mpu.cycle_dt();       
+        mpu_res = MpuDrv::Mpu.cycle_dt();               
         MpuDrv::Mpu.Release();
       } else continue;
       if(mpu_res==2) {
         // IMU settled
         fMPUReady=true;
+        if(MpuDrv::Mpu.Acquire()) {
+            MpuDrv::Mpu.FFT_StartSampling();               
+            MpuDrv::Mpu.Release();
+          }
         xLogger.vAddLogMsg("MPU Ready!");
       }
     }
@@ -115,17 +148,6 @@ void setup() {
     delay(5000);
     //disableDebugPorts(); // disable JTAG debug, enable PB3,4 for usage
     // NEVER do this!!!
-/*
-    pinMode(DISPLAY_LED, PWM);
-    pwmWrite(DISPLAY_LED, 16000);
-
-    tft.begin();
-    tft.fillScreen(WHITE);
-    tft.setTextColor(BLACK);  
-    tft.setTextSize(1);
-    tft.setTextColor(BLACK, WHITE);
-    tft.drawString("Starting...",20,20,4);
-    */
 
     xDisplay.Init();
     Serial.begin(115200); 
@@ -138,7 +160,8 @@ void setup() {
     //Wire.begin(SCL_PIN, SDA_PIN);
     Wire.begin();
     MpuDrv::Mpu.init();
-     
+    MpuDrv::Mpu.FFT_SetSampling(vReal, FFT_SAMPLES);
+
     Serial.println("Starting...");
     digitalWrite(BOARD_LED_PIN, HIGH);
        
