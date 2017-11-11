@@ -58,9 +58,11 @@ void Display::Init() {
     //tft.drawString("DISP OK",160,48,2);
 
     ShowStatus("0123456789abcdef");
-
-    for(int i=0; i<10; i++) {
-        tft.fillRect(i*7*32, DISPLAY_V_SZ-i*10-1, 6, i*10, ILI9341_RED);
+    
+    int8_t w=240/(32);
+    for(int i=0; i<32; i++) {
+      int16_t h=i*5+2;
+      tft.fillRect(i*(w), DISPLAY_V_SZ-h-1, w-1, h, (i%10==0 ? ILI9341_GREEN : ILI9341_RED));
     }
 
 }

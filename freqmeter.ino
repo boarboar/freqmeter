@@ -103,7 +103,7 @@ static void vDispOutTask(void *pvParameters) {
                 xLogger.vAddLogMsg("Sampling ready:", FFT_SAMPLES);
                 for(int i=0; i<FFT_SAMPLES; i++) {
                     xLogger.vAddLogMsg("S", i, "V", (int16_t)vReal[i]);
-                    vTaskDelay(1);                              
+                    vTaskDelay(10);                              
                 }
                 if(MpuDrv::Mpu.Acquire()) {
                     MpuDrv::Mpu.FFT_StartSampling();
