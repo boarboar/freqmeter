@@ -101,10 +101,12 @@ static void vDispOutTask(void *pvParameters) {
             if(bSampReady) {
                 // there is no sampling at the miment, so we can use the buffer for FFT
                 xLogger.vAddLogMsg("Sampling ready:", FFT_SAMPLES);
+                /*
                 for(int i=0; i<FFT_SAMPLES; i++) {
                     xLogger.vAddLogMsg("S", i, "V", (int16_t)vReal[i]);
                     vTaskDelay(10);                              
-                }
+                }*/
+                xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 256);    
                 if(MpuDrv::Mpu.Acquire()) {
                     MpuDrv::Mpu.FFT_StartSampling();
                     MpuDrv::Mpu.Release();                
@@ -155,7 +157,21 @@ void setup() {
     Serial.println(portTICK_PERIOD_MS);
     
     xLogger.Init();
-      
+    
+    // test Display
+     /* Build raw data */
+     const double signalFrequency = 1000;
+     const double samplingFrequency = 5000;
+     const uint8_t amplitude = 100;
+    double cycles = (((FFT_SAMPLES-1) * signalFrequency) / samplingFrequency); //Number of signal cycles that the sampling will read
+    for (uint16_t i = 0; i < FFT_SAMPLES; i++)
+    {
+        vReal[i] = int8_t((amplitude * (sin((i * (PI*2 * cycles)) / FFT_SAMPLES))) / 2.0);/* Build data with positive and negative values*/
+        //vReal[i] = uint8_t((amplitude * (sin((i * (twoPi * cycles)) / samples) + 1.0)) / 2.0);/* Build data displaced on the Y axis to include only positive values*/
+        //vImag[i] = 0.0; //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
+    }
+    xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 256);
+
     Serial.println("Init Wire...");
     //Wire.begin(SCL_PIN, SDA_PIN);
     Wire.begin();
