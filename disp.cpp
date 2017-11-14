@@ -16,6 +16,9 @@
 #define DISPLAY_H_SZ  240
 #define DISPLAY_V_SZ  320
 
+#define D_FONT_SZ   4
+#define D_FONT_H    26
+
 extern ComLogger xLogger;
 
 Adafruit_ILI9341_STM tft = Adafruit_ILI9341_STM( DISPLAY_CS, DISPLAY_DC, DISPLAY_RST);       // Invoke custom library
@@ -80,8 +83,6 @@ void Display::ShowStatus(const char *msg) {
 }
 
 void Display::ShowData3(const int16_t d[3], int row) {
-    const int D_FONT_SZ = 4;
-    const int D_FONT_H = 26;
     itoa(d[0], out_buf);
     strcat(out_buf, " ");
     itoa_cat(d[1], out_buf);
@@ -93,7 +94,7 @@ void Display::ShowData3(const int16_t d[3], int row) {
 }
 
 void Display::ShowChart(const double *pdVals, int16_t nvals, int16_t y, int16_t h) {
-    int16_t vmax=-32768, vmin=32767;
+    int16_t vmax=-32768, vmin=32767, vmed;
     int16_t v;
     int8_t w, i;
     if(!pdVals || nvals<=0 || h<=0) return;
@@ -102,19 +103,26 @@ void Display::ShowChart(const double *pdVals, int16_t nvals, int16_t y, int16_t 
         if(v<vmin) vmin=v;
         if(v>vmax) vmax=v;
     }
-    xLogger.vAddLogMsg("VMIN", vmin, "VMAX", vmax);
+    vmed=(vmax-vmin)/2;
+    //xLogger.vAddLogMsg("VMIN", vmin, "VMAX", vmax);
     // scale = h/(vmax-vmin+1)
     w=240/(nvals);
-    tft.fillRect(0, 320-256, 240-1, 320-1, ILI9341_DARKGREY);
+    tft.fillRect(0, DISPLAY_V_SZ-h, DISPLAY_H_SZ-1, DISPLAY_V_SZ-1, ILI9341_DARKGREY);
     for(i=0; i<nvals; i++) {
       //int16_t h=i*5+2;
-      v=(int16_t)((int32_t)pdVals[i]*h/((int32_t)vmax-vmin+1));
+      v=(int16_t)( ((int32_t)pdVals[i]-vmed)*h / ((int32_t)vmax-vmin+1) );
       if(v>=0)
         tft.fillRect(i*(w), y-v, w-1, v, ILI9341_RED);
       else  
         tft.fillRect(i*(w), y, w-1, -v,ILI9341_GREEN);
     }
-    tft.drawFastHLine(0, y, 240-1, ILI9341_BLUE);
+    tft.drawFastHLine(0, y, DISPLAY_H_SZ-1, ILI9341_BLUE);
+    itoa(vmax, out_buf);
+    tft.drawString(out_buf,0,DISPLAY_V_SZ-h, D_FONT_SZ);
+    itoa(vmed, out_buf);
+    tft.drawString(out_buf,0,DISPLAY_V_SZ-h/2, D_FONT_SZ);
+    itoa(vmin, out_buf);
+    tft.drawString(out_buf,0,DISPLAY_V_SZ-D_FONT_H, D_FONT_SZ);
 }
 
 /*

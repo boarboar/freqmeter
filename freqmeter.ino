@@ -155,22 +155,14 @@ void setup() {
     Serial.begin(115200); 
     Serial.print("Tick = ");
     Serial.println(portTICK_PERIOD_MS);
-    
+        
     xLogger.Init();
     
-    // test Display
-     /* Build raw data */
-     const double signalFrequency = 1000;
-     const double samplingFrequency = 5000;
-     const uint8_t amplitude = 100;
-    double cycles = (((FFT_SAMPLES-1) * signalFrequency) / samplingFrequency); //Number of signal cycles that the sampling will read
-    for (uint16_t i = 0; i < FFT_SAMPLES; i++)
-    {
-        vReal[i] = int8_t((amplitude * (sin((i * (PI*2 * cycles)) / FFT_SAMPLES))) / 2.0);/* Build data with positive and negative values*/
-        //vReal[i] = uint8_t((amplitude * (sin((i * (twoPi * cycles)) / samples) + 1.0)) / 2.0);/* Build data displaced on the Y axis to include only positive values*/
-        //vImag[i] = 0.0; //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
-    }
-    xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 256);
+    TestChart(20);
+    delay(1000);
+    TestChart(50);
+    delay(1000);
+    TestChart(100);
 
     Serial.println("Init Wire...");
     //Wire.begin(SCL_PIN, SDA_PIN);
@@ -209,4 +201,19 @@ void loop() {
     // Insert background code here
 }
 
-
+void TestChart(double signalFrequency) {
+ // test Display
+     /* Build raw data */
+     //const double signalFrequency = 1000;
+     //const double samplingFrequency = 5000;
+     const double samplingFrequency = 1000;
+     const uint8_t amplitude = 100;
+    double cycles = (((FFT_SAMPLES-1) * signalFrequency) / samplingFrequency); //Number of signal cycles that the sampling will read
+    for (uint16_t i = 0; i < FFT_SAMPLES; i++)
+    {
+        vReal[i] = int8_t((amplitude * (sin((i * (PI*2 * cycles)) / FFT_SAMPLES))) / 2.0);/* Build data with positive and negative values*/
+        //vReal[i] = uint8_t((amplitude * (sin((i * (twoPi * cycles)) / samples) + 1.0)) / 2.0);/* Build data displaced on the Y axis to include only positive values*/
+        //vImag[i] = 0.0; //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
+    }
+    xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 256);
+}
