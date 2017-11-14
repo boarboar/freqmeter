@@ -44,8 +44,8 @@
 */
 
 #define TASK_DELAY_LOG 10
-//#define TASK_DELAY_DISP 200
-#define TASK_DELAY_DISP 10000
+#define TASK_DELAY_DISP 100
+//#define TASK_DELAY_DISP 10000
 #define TASK_DELAY_MPU 1   // 1kHz
 
 Display xDisplay;
@@ -77,18 +77,21 @@ static void vDispOutTask(void *pvParameters) {
     boolean bSampReady=false;
     for (;;) {
         if(fMPUReady) {
+          
             if(MpuDrv::Mpu.Acquire()) {
                 bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
-                MpuDrv::Mpu.getRawAccel(a);                
+                //MpuDrv::Mpu.getRawAccel(a);                
                 MpuDrv::Mpu.Release();
-                xDisplay.ShowData3(a, 0);
+                //xDisplay.ShowData3(a, 0);
             } 
+            /*
             vTaskDelay(1);
             if(MpuDrv::Mpu.Acquire()) {
                 MpuDrv::Mpu.getAccel(a);                
                 MpuDrv::Mpu.Release();
                 xDisplay.ShowData3(a, 1);
             } 
+            */
             /*
             vTaskDelay(1);
             if(MpuDrv::Mpu.Acquire()) {
@@ -138,6 +141,7 @@ static void vIMU_Task(void *pvParameters) {
             MpuDrv::Mpu.Release();
           }
         xLogger.vAddLogMsg("MPU Ready!");
+        xDisplay.ShowStatus("Ready");
       }
     }
 }
@@ -159,9 +163,9 @@ void setup() {
     xLogger.Init();
     
     TestChart(20);
-    delay(1000);
+    //delay(1000);
     TestChart(50);
-    delay(1000);
+    //delay(1000);
     TestChart(100);
 
     Serial.println("Init Wire...");

@@ -103,7 +103,7 @@ void Display::ShowChart(const double *pdVals, int16_t nvals, int16_t y, int16_t 
         if(v<vmin) vmin=v;
         if(v>vmax) vmax=v;
     }
-    vmed=(vmax-vmin)/2;
+    vmed=(vmax+vmin)/2;
     //xLogger.vAddLogMsg("VMIN", vmin, "VMAX", vmax);
     // scale = h/(vmax-vmin+1)
     w=240/(nvals);
