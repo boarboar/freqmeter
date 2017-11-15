@@ -109,7 +109,7 @@ static void vDispOutTask(void *pvParameters) {
                     xLogger.vAddLogMsg("S", i, "V", (int16_t)vReal[i]);
                     vTaskDelay(10);                              
                 }*/
-                xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 256);    
+                xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 256, 128);    
                 if(MpuDrv::Mpu.Acquire()) {
                     MpuDrv::Mpu.FFT_StartSampling();
                     MpuDrv::Mpu.Release();                
@@ -219,5 +219,5 @@ void TestChart(double signalFrequency) {
         //vReal[i] = uint8_t((amplitude * (sin((i * (twoPi * cycles)) / samples) + 1.0)) / 2.0);/* Build data displaced on the Y axis to include only positive values*/
         //vImag[i] = 0.0; //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
     }
-    xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 256);
+    xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 256, 128);
 }

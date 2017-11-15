@@ -19,6 +19,9 @@
 #define D_FONT_SZ   4
 #define D_FONT_H    26
 
+#define D_FONT_S_SZ 2
+#define D_FONT_S_H  16
+
 extern ComLogger xLogger;
 
 Adafruit_ILI9341_STM tft = Adafruit_ILI9341_STM( DISPLAY_CS, DISPLAY_DC, DISPLAY_RST);       // Invoke custom library
@@ -89,13 +92,14 @@ void Display::ShowData3(const int16_t d[3], int row) {
     strcat(out_buf, " ");
     itoa_cat(d[2], out_buf);
     tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
-    tft.fillRect(0, row*D_FONT_H, DISPLAY_H_SZ, D_FONT_H, ILI9341_BLACK);
-    tft.drawString(out_buf,0,row*D_FONT_H, D_FONT_SZ);
+    //tft.fillRect(0, row*D_FONT_H, DISPLAY_H_SZ, D_FONT_H, ILI9341_BLACK);
+    int16_t dx = tft.drawString(out_buf,0,row*D_FONT_H, D_FONT_SZ);
+    tft.fillRect(dx, row*D_FONT_H, DISPLAY_H_SZ-dx, D_FONT_H, ILI9341_BLACK);
 }
 
-void Display::ShowChart(const double *pdVals, int16_t nvals, int16_t y, int16_t h) {
+void Display::ShowChart(const double *pdVals, int16_t nvals, int16_t y, int16_t h, int16_t h0) {
     int16_t vmax=-32768, vmin=32767, vmed;
-    int16_t v;
+    int16_t v, y0=y+h0;
     int8_t w, i;
     if(!pdVals || nvals<=0 || h<=0) return;
     for(i=0; i<nvals; i++) {
@@ -107,22 +111,24 @@ void Display::ShowChart(const double *pdVals, int16_t nvals, int16_t y, int16_t 
     //xLogger.vAddLogMsg("VMIN", vmin, "VMAX", vmax);
     // scale = h/(vmax-vmin+1)
     w=240/(nvals);
-    tft.fillRect(0, DISPLAY_V_SZ-h, DISPLAY_H_SZ-1, DISPLAY_V_SZ-1, ILI9341_DARKGREY);
+    //tft.fillRect(0, DISPLAY_V_SZ-h, DISPLAY_H_SZ-1, DISPLAY_V_SZ-1, ILI9341_DARKGREY);
+    tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_DARKGREY);
     for(i=0; i<nvals; i++) {
       //int16_t h=i*5+2;
       v=(int16_t)( ((int32_t)pdVals[i]-vmed)*h / ((int32_t)vmax-vmin+1) );
       if(v>=0)
-        tft.fillRect(i*(w), y-v, w-1, v, ILI9341_RED);
+        tft.fillRect(i*(w), y0-v, w-1, v, ILI9341_RED);
       else  
-        tft.fillRect(i*(w), y, w-1, -v,ILI9341_GREEN);
+        tft.fillRect(i*(w), y0, w-1, -v, ILI9341_GREEN);
     }
-    tft.drawFastHLine(0, y, DISPLAY_H_SZ-1, ILI9341_BLUE);
+    tft.drawFastHLine(0, y0, DISPLAY_H_SZ-1, ILI9341_BLUE);
+    tft.setTextColor(ILI9341_YELLOW); // transparent
     itoa(vmax, out_buf);
-    tft.drawString(out_buf,0,DISPLAY_V_SZ-h, D_FONT_SZ);
+    tft.drawString(out_buf,0, y, D_FONT_S_SZ);
     itoa(vmed, out_buf);
-    tft.drawString(out_buf,0,DISPLAY_V_SZ-h/2, D_FONT_SZ);
+    tft.drawString(out_buf,0, y0, D_FONT_S_SZ);
     itoa(vmin, out_buf);
-    tft.drawString(out_buf,0,DISPLAY_V_SZ-D_FONT_H, D_FONT_SZ);
+    tft.drawString(out_buf, 0, y+h-D_FONT_S_H, D_FONT_S_SZ);
 }
 
 /*
