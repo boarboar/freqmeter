@@ -73,7 +73,14 @@ static void vSerialOutTask(void *pvParameters) {
 
 static void vDispOutTask(void *pvParameters) {
     //tft.drawString("Task started!",20,20,4);
-    int16_t a[3];
+    //int16_t a[3];
+    
+    TestChart(20);
+    vTaskDelay(1000);
+    TestChart(50);
+    vTaskDelay(1000);
+    TestChart(100);
+
     boolean bSampReady=false;
     for (;;) {
         if(fMPUReady) {
@@ -109,7 +116,10 @@ static void vDispOutTask(void *pvParameters) {
                     xLogger.vAddLogMsg("S", i, "V", (int16_t)vReal[i]);
                     vTaskDelay(10);                              
                 }*/
+                uint32_t xRunTime=xTaskGetTickCount();
                 xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 256, 128);    
+                xLogger.vAddLogMsg("DT", (int16_t)(xTaskGetTickCount()-xRunTime));
+                
                 if(MpuDrv::Mpu.Acquire()) {
                     MpuDrv::Mpu.FFT_StartSampling();
                     MpuDrv::Mpu.Release();                
@@ -161,12 +171,13 @@ void setup() {
     Serial.println(portTICK_PERIOD_MS);
         
     xLogger.Init();
-    
+    /*
     TestChart(20);
     //delay(1000);
     TestChart(50);
     //delay(1000);
     TestChart(100);
+    */
 
     Serial.println("Init Wire...");
     //Wire.begin(SCL_PIN, SDA_PIN);
@@ -206,12 +217,12 @@ void loop() {
 }
 
 void TestChart(double signalFrequency) {
- // test Display
-     /* Build raw data */
-     //const double signalFrequency = 1000;
-     //const double samplingFrequency = 5000;
-     const double samplingFrequency = 1000;
-     const uint8_t amplitude = 100;
+    // test Display
+    /* Build raw data */
+    //const double signalFrequency = 1000;
+    //const double samplingFrequency = 5000;
+    const double samplingFrequency = 1000;
+    const uint8_t amplitude = 100;
     double cycles = (((FFT_SAMPLES-1) * signalFrequency) / samplingFrequency); //Number of signal cycles that the sampling will read
     for (uint16_t i = 0; i < FFT_SAMPLES; i++)
     {

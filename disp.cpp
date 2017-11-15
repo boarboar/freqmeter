@@ -110,7 +110,7 @@ void Display::ShowChart(const double *pdVals, int16_t nvals, int16_t y, int16_t 
     vmed=(vmax+vmin)/2;
     //xLogger.vAddLogMsg("VMIN", vmin, "VMAX", vmax);
     // scale = h/(vmax-vmin+1)
-    w=240/(nvals);
+    w=DISPLAY_H_SZ/(nvals);
     //tft.fillRect(0, DISPLAY_V_SZ-h, DISPLAY_H_SZ-1, DISPLAY_V_SZ-1, ILI9341_DARKGREY);
     tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_DARKGREY);
     for(i=0; i<nvals; i++) {
