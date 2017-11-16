@@ -99,7 +99,7 @@ void Display::ShowData3(const int16_t d[3], int row) {
 
 void Display::ShowChart(const double *pdVals, int16_t nvals, int16_t y, int16_t h, int16_t h0) {
     int16_t vmax=-32768, vmin=32767, vmed;
-    int16_t v, y0=y+h0;
+    int16_t v, y0=y+h0, xp;
     int8_t w, i;
     if(!pdVals || nvals<=0 || h<=0) return;
     for(i=0; i<nvals; i++) {
@@ -108,18 +108,24 @@ void Display::ShowChart(const double *pdVals, int16_t nvals, int16_t y, int16_t 
         if(v>vmax) vmax=v;
     }
     vmed=(vmax+vmin)/2;
-    //xLogger.vAddLogMsg("VMIN", vmin, "VMAX", vmax);
     // scale = h/(vmax-vmin+1)
     w=DISPLAY_H_SZ/(nvals);
-    //tft.fillRect(0, DISPLAY_V_SZ-h, DISPLAY_H_SZ-1, DISPLAY_V_SZ-1, ILI9341_DARKGREY);
-    tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_DARKGREY);
+    //tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_DARKGREY);
     for(i=0; i<nvals; i++) {
-      //int16_t h=i*5+2;
       v=(int16_t)( ((int32_t)pdVals[i]-vmed)*h / ((int32_t)vmax-vmin+1) );
-      if(v>=0)
-        tft.fillRect(i*(w), y0-v, w-1, v, ILI9341_RED);
-      else  
-        tft.fillRect(i*(w), y0, w-1, -v, ILI9341_GREEN);
+      xp=i*(w);
+      if(v>=0) {
+        tft.fillRect(xp, y0-v, w-1, v, ILI9341_RED);
+        tft.fillRect(xp, y0, w-1, h0, ILI9341_DARKGREY); // low half
+        if(h0-v>0) // up part
+            tft.fillRect(xp, y0, w-1, h0-v, ILI9341_DARKGREY);
+      }
+      else  {
+        tft.fillRect(xp, y0, w-1, -v, ILI9341_GREEN);
+        tft.fillRect(xp, y, w-1, h0, ILI9341_DARKGREY); // up half
+        if(h0+v>0) // low part
+            tft.fillRect(xp, y0, w-1, h0+v, ILI9341_DARKGREY);
+      }
     }
     tft.drawFastHLine(0, y0, DISPLAY_H_SZ-1, ILI9341_BLUE);
     tft.setTextColor(ILI9341_YELLOW); // transparent

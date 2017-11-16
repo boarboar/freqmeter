@@ -4,6 +4,7 @@
 #include <Adafruit_GFX_AS.h>    // Core graphics library, with extra fonts.
 #include "Adafruit_ILI9341_STM_1.h" // STM32 DMA Hardware-specific library
 #include <SPI.h>
+#include "arduinoFFT.h"
 
 #include "disp.h"
 #include "log.h"
@@ -51,6 +52,8 @@
 Display xDisplay;
 ComLogger xLogger;
 
+arduinoFFT FFT; /* Create FFT object */
+
 boolean fMPUReady=false;
 
 //int16_t fft_buf[64];
@@ -76,9 +79,9 @@ static void vDispOutTask(void *pvParameters) {
     //int16_t a[3];
     
     TestChart(20);
-    vTaskDelay(1000);
+    vTaskDelay(2000);
     TestChart(50);
-    vTaskDelay(1000);
+    vTaskDelay(2000);
     TestChart(100);
 
     boolean bSampReady=false;
@@ -111,13 +114,9 @@ static void vDispOutTask(void *pvParameters) {
             if(bSampReady) {
                 // there is no sampling at the miment, so we can use the buffer for FFT
                 xLogger.vAddLogMsg("Sampling ready:", FFT_SAMPLES);
-                /*
-                for(int i=0; i<FFT_SAMPLES; i++) {
-                    xLogger.vAddLogMsg("S", i, "V", (int16_t)vReal[i]);
-                    vTaskDelay(10);                              
-                }*/
                 uint32_t xRunTime=xTaskGetTickCount();
                 xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64);
+                FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_HANN, FFT_FORWARD);	/* Weigh data */
                 xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64);    
                 xLogger.vAddLogMsg("DT", (int16_t)(xTaskGetTickCount()-xRunTime));
                 
@@ -172,13 +171,6 @@ void setup() {
     Serial.println(portTICK_PERIOD_MS);
         
     xLogger.Init();
-    /*
-    TestChart(20);
-    //delay(1000);
-    TestChart(50);
-    //delay(1000);
-    TestChart(100);
-    */
 
     Serial.println("Init Wire...");
     //Wire.begin(SCL_PIN, SDA_PIN);
@@ -220,8 +212,6 @@ void loop() {
 void TestChart(double signalFrequency) {
     // test Display
     /* Build raw data */
-    //const double signalFrequency = 1000;
-    //const double samplingFrequency = 5000;
     const double samplingFrequency = 1000;
     const uint8_t amplitude = 100;
     double cycles = (((FFT_SAMPLES-1) * signalFrequency) / samplingFrequency); //Number of signal cycles that the sampling will read
@@ -233,4 +223,6 @@ void TestChart(double signalFrequency) {
     }
     //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 256, 128);
     xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64);
+    FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_HANN, FFT_FORWARD);	/* Weigh data */
+    xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64);    
 }
