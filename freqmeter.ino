@@ -116,7 +116,7 @@ static void vDispOutTask(void *pvParameters) {
                 xLogger.vAddLogMsg("Sampling ready:", FFT_SAMPLES);
                 uint32_t xRunTime=xTaskGetTickCount();
                 xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64);
-                FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_HANN, FFT_FORWARD);	/* Weigh data */
+                FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	/* Weigh data */
                 xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64);    
                 xLogger.vAddLogMsg("DT", (int16_t)(xTaskGetTickCount()-xRunTime));
                 
@@ -223,6 +223,6 @@ void TestChart(double signalFrequency) {
     }
     //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 256, 128);
     xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64);
-    FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_HANN, FFT_FORWARD);	/* Weigh data */
+    FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	/* Weigh data */
     xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64);    
 }

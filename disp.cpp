@@ -110,21 +110,25 @@ void Display::ShowChart(const double *pdVals, int16_t nvals, int16_t y, int16_t 
     vmed=(vmax+vmin)/2;
     // scale = h/(vmax-vmin+1)
     w=DISPLAY_H_SZ/(nvals);
-    //tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_DARKGREY);
+    tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_DARKGREY);
     for(i=0; i<nvals; i++) {
       v=(int16_t)( ((int32_t)pdVals[i]-vmed)*h / ((int32_t)vmax-vmin+1) );
       xp=i*(w);
       if(v>=0) {
         tft.fillRect(xp, y0-v, w-1, v, ILI9341_RED);
+        /*
         tft.fillRect(xp, y0, w-1, h0, ILI9341_DARKGREY); // low half
         if(h0-v>0) // up part
             tft.fillRect(xp, y0, w-1, h0-v, ILI9341_DARKGREY);
+            */
       }
       else  {
         tft.fillRect(xp, y0, w-1, -v, ILI9341_GREEN);
+        /*
         tft.fillRect(xp, y, w-1, h0, ILI9341_DARKGREY); // up half
         if(h0+v>0) // low part
             tft.fillRect(xp, y0, w-1, h0+v, ILI9341_DARKGREY);
+            */
       }
     }
     tft.drawFastHLine(0, y0, DISPLAY_H_SZ-1, ILI9341_BLUE);
