@@ -97,7 +97,8 @@ void Display::ShowData3(const int16_t d[3], int row) {
     tft.fillRect(dx, row*D_FONT_H, DISPLAY_H_SZ-dx, D_FONT_H, ILI9341_BLACK);
 }
 
-void Display::ShowChart(const double *pdVals, int16_t nvals, int16_t y, int16_t h, int16_t h0) {
+void Display::ShowChart(const double *pdVals, int16_t nvals, 
+        int16_t y, int16_t h, int16_t h0, int16_t xlab) {
     int16_t vmax=-32768, vmin=32767, vmed;
     int16_t v, y0=y+h0, xp;
     int8_t w, i;
@@ -139,6 +140,8 @@ void Display::ShowChart(const double *pdVals, int16_t nvals, int16_t y, int16_t 
     tft.drawString(out_buf,0, y0, D_FONT_S_SZ);
     itoa(vmin, out_buf);
     tft.drawString(out_buf, 0, y+h-D_FONT_S_H, D_FONT_S_SZ);
+    itoa(xlab, out_buf);
+    tft.drawRightString(out_buf, DISPLAY_H_SZ, y0, D_FONT_S_SZ);
 }
 
 /*

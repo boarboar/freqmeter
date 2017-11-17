@@ -10,6 +10,15 @@
 #include "log.h"
 #include "mpu.h"
 
+/*
+Adafruit_GFX_AS : Load_fonts.h to be fixed:
+//#define LOAD_GLCD // Standard Adafruit font needs ~1792 bytes in FLASH
+
+#define LOAD_FONT2 // Small font, needs ~3092 bytes in FLASH
+#define LOAD_FONT4 // Medium font, needs ~8126 bytes in FLASH
+//#define LOAD_FONT6 // Large font, needs ~4404 bytes in FLASH
+//#define LOAD_FONT7 // 7 segment font, needs ~3652 bytes in FLASH
+*/
 
 /*
  * vacant ports
@@ -78,12 +87,14 @@ static void vDispOutTask(void *pvParameters) {
     //tft.drawString("Task started!",20,20,4);
     //int16_t a[3];
     
-    TestChart(20);
+    TestChart(20); // 20Hz
     vTaskDelay(2000);
-    TestChart(50);
+    TestChart(50); // 50Hz
     vTaskDelay(2000);
-    TestChart(100);
-
+    TestChart(100); // 100Hz
+    vTaskDelay(2000);
+    TestChart(250); // 250Hz
+    
     boolean bSampReady=false;
     for (;;) {
         if(fMPUReady) {
@@ -114,11 +125,11 @@ static void vDispOutTask(void *pvParameters) {
             if(bSampReady) {
                 // there is no sampling at the miment, so we can use the buffer for FFT
                 xLogger.vAddLogMsg("Sampling ready:", FFT_SAMPLES);
-                uint32_t xRunTime=xTaskGetTickCount();
-                xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64);
-                FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	/* Weigh data */
-                xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64);    
-                xLogger.vAddLogMsg("DT", (int16_t)(xTaskGetTickCount()-xRunTime));
+                //uint32_t xRunTime=xTaskGetTickCount();
+                xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
+                //FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	/* Weigh data */
+                xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);    
+                //xLogger.vAddLogMsg("DT", (int16_t)(xTaskGetTickCount()-xRunTime));
                 
                 if(MpuDrv::Mpu.Acquire()) {
                     MpuDrv::Mpu.FFT_StartSampling();
@@ -222,7 +233,15 @@ void TestChart(double signalFrequency) {
         //vImag[i] = 0.0; //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
     }
     //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 256, 128);
-    xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64);
-    FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	/* Weigh data */
-    xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64);    
+    uint32_t xRunTime=xTaskGetTickCount();
+    xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
+    xLogger.vAddLogMsg("CHD", (int16_t)(xTaskGetTickCount()-xRunTime));
+    xRunTime=xTaskGetTickCount();
+    //FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	/* Weigh data */
+    FFT.Compute(vReal, vImag, FFT_SAMPLES, FFT_FORWARD); /* Compute FFT */
+    xLogger.vAddLogMsg("CMP", (int16_t)(xTaskGetTickCount()-xRunTime));
+    xRunTime=xTaskGetTickCount();
+    FFT.ComplexToMagnitude(vReal, vImag, FFT_SAMPLES); /* Compute magnitudes */
+    xDisplay.ShowChart(vReal, (FFT_SAMPLES>>1), 320-128, 128, 64, ((1000/TASK_DELAY_MPU)>>1));    
+    xLogger.vAddLogMsg("CHD", (int16_t)(xTaskGetTickCount()-xRunTime));
 }
