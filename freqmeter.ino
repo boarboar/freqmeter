@@ -128,8 +128,12 @@ static void vDispOutTask(void *pvParameters) {
                 //uint32_t xRunTime=xTaskGetTickCount();
                 xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
                 //FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	/* Weigh data */
-                xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);    
+               // xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);    
                 //xLogger.vAddLogMsg("DT", (int16_t)(xTaskGetTickCount()-xRunTime));
+                for (uint16_t i = 0; i < FFT_SAMPLES; i++) vImag[i] = 0.0;
+                FFT.Compute(vReal, vImag, FFT_SAMPLES, FFT_FORWARD); /* Compute FFT */    
+                FFT.ComplexToMagnitude(vReal, vImag, FFT_SAMPLES); /* Compute magnitudes */
+                xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128, 128, ((1000/TASK_DELAY_MPU)>>1));    
                 
                 if(MpuDrv::Mpu.Acquire()) {
                     MpuDrv::Mpu.FFT_StartSampling();
@@ -224,13 +228,15 @@ void TestChart(double signalFrequency) {
     // test Display
     /* Build raw data */
     const double samplingFrequency = 1000;
-    const uint8_t amplitude = 100;
+    //const uint8_t amplitude = 100;
+    const uint16_t amplitude = 1000;
     double cycles = (((FFT_SAMPLES-1) * signalFrequency) / samplingFrequency); //Number of signal cycles that the sampling will read
     for (uint16_t i = 0; i < FFT_SAMPLES; i++)
     {
-        vReal[i] = int8_t((amplitude * (sin((i * (PI*2 * cycles)) / FFT_SAMPLES))) / 2.0);/* Build data with positive and negative values*/
+        //vReal[i] = int8_t((amplitude * (sin((i * (PI*2 * cycles)) / FFT_SAMPLES))) / 2.0);/* Build data with positive and negative values*/
         //vReal[i] = uint8_t((amplitude * (sin((i * (twoPi * cycles)) / samples) + 1.0)) / 2.0);/* Build data displaced on the Y axis to include only positive values*/
-        //vImag[i] = 0.0; //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
+        vReal[i] = ((amplitude * (sin((i * (PI*2 * cycles)) / FFT_SAMPLES))) / 2.0);/* Build data with positive and negative values*/
+        vImag[i] = 0.0; //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
     }
     //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 256, 128);
     uint32_t xRunTime=xTaskGetTickCount();
@@ -242,6 +248,6 @@ void TestChart(double signalFrequency) {
     xLogger.vAddLogMsg("CMP", (int16_t)(xTaskGetTickCount()-xRunTime));
     xRunTime=xTaskGetTickCount();
     FFT.ComplexToMagnitude(vReal, vImag, FFT_SAMPLES); /* Compute magnitudes */
-    xDisplay.ShowChart(vReal, (FFT_SAMPLES>>1), 320-128, 128, 64, ((1000/TASK_DELAY_MPU)>>1));    
+    xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128, 128, ((1000/TASK_DELAY_MPU)>>1));    
     xLogger.vAddLogMsg("CHD", (int16_t)(xTaskGetTickCount()-xRunTime));
 }
