@@ -126,7 +126,8 @@ static void vDispOutTask(void *pvParameters) {
                 // there is no sampling at the miment, so we can use the buffer for FFT
                 xLogger.vAddLogMsg("Sampling ready:", FFT_SAMPLES);
                 //uint32_t xRunTime=xTaskGetTickCount();
-                xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
+                //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
+                xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256, 128, TASK_DELAY_MPU*FFT_SAMPLES);
                 //FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	/* Weigh data */
                // xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);    
                 //xLogger.vAddLogMsg("DT", (int16_t)(xTaskGetTickCount()-xRunTime));
@@ -240,7 +241,8 @@ void TestChart(double signalFrequency) {
     }
     //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 256, 128);
     uint32_t xRunTime=xTaskGetTickCount();
-    xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
+    //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
+    xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256, 128, TASK_DELAY_MPU*FFT_SAMPLES);
     xLogger.vAddLogMsg("CHD", (int16_t)(xTaskGetTickCount()-xRunTime));
     xRunTime=xTaskGetTickCount();
     //FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	/* Weigh data */
