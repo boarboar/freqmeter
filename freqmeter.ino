@@ -127,6 +127,7 @@ static void vDispOutTask(void *pvParameters) {
                 xLogger.vAddLogMsg("Sampling ready:", FFT_SAMPLES);
                 //uint32_t xRunTime=xTaskGetTickCount();
                 //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
+                FFT_DeBias(vReal, FFT_SAMPLES);
                 xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256, 128, TASK_DELAY_MPU*FFT_SAMPLES);
                 //FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	/* Weigh data */
                // xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);    
@@ -242,6 +243,7 @@ void TestChart(double signalFrequency) {
     //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 256, 128);
     uint32_t xRunTime=xTaskGetTickCount();
     //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
+    FFT_DeBias(vReal, FFT_SAMPLES);
     xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256, 128, TASK_DELAY_MPU*FFT_SAMPLES);
     xLogger.vAddLogMsg("CHD", (int16_t)(xTaskGetTickCount()-xRunTime));
     xRunTime=xTaskGetTickCount();
@@ -253,3 +255,17 @@ void TestChart(double signalFrequency) {
     xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128, 128, ((1000/TASK_DELAY_MPU)>>1));    
     xLogger.vAddLogMsg("CHD", (int16_t)(xTaskGetTickCount()-xRunTime));
 }
+
+
+void  FFT_DeBias(double *pdSamples, int8_t n) {
+    double mean = 0;
+    uint16_t i;
+    for(i=0; i<n; i++) {
+        mean+=pdSamples[i];
+    }
+    mean/=n;
+    for(i=0; i<n; i++) {
+        pdSamples[i]-=mean;
+    }
+  }
+  

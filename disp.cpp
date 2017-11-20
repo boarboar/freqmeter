@@ -155,8 +155,6 @@ void Display::ShowChart0(const double *pdVals, int16_t nvals,
         v=abs((int16_t)pdVals[i]);
         if(v>vmax) vmax=v;
     }
-    //vmed=(vmax+vmin)/2;
-    // scale = h/(vmax-vmin+1)
     w=DISPLAY_H_SZ/(nvals);
     tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_BLACK);
     for(i=0; i<nvals; i++) {
@@ -191,8 +189,6 @@ void Display::ShowChartPlus(const double *pdVals, int16_t nvals,
         v=(int16_t)pdVals[i];
         if(v>vmax) vmax=v;
     }
-    //vmed=(vmax+vmin)/2;
-    // scale = h/(vmax-vmin+1)
     w=DISPLAY_H_SZ/(nvals);
     tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_BLACK);
     for(i=0; i<nvals; i++) {
@@ -200,13 +196,14 @@ void Display::ShowChartPlus(const double *pdVals, int16_t nvals,
       xp=i*(w);
       tft.fillRect(xp, y0-v, w-1, v, ILI9341_RED);
     }
-    //tft.drawFastHLine(0, y0, DISPLAY_H_SZ-1, ILI9341_BLUE);
     //tft.setTextColor(ILI9341_YELLOW); // transparent
     tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
     itoa(vmax, out_buf);
     tft.drawString(out_buf, 0, y, D_FONT_S_SZ);
     itoa(xlab, out_buf);
     tft.drawRightString(out_buf, DISPLAY_H_SZ, y0, D_FONT_S_SZ);
+    itoa(xlab/2, out_buf);
+    tft.drawRightString(out_buf, DISPLAY_H_SZ/2, y0, D_FONT_S_SZ);
 }
 /*
 static int c=0;
