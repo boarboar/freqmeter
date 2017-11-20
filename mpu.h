@@ -51,9 +51,8 @@ public:
 
   void FFT_SetSampling(double *dSamples, int8_t n);
   void FFT_StartSampling(); 
-  //boolean FFT_SamplingReady(int16_t *dst=NULL, int32_t sz=0);
   boolean FFT_SamplingReady();
-
+  
 protected:  
   MpuDrv();
   // MPU control/status vars
