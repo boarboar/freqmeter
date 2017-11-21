@@ -250,7 +250,7 @@ void TestChart(double signalFrequency) {
     xRunTime=xTaskGetTickCount();
     //FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	/* Weigh data */
     FFT_ComputeMagnitude(vReal, vImag, FFT_SAMPLES); 
-    FFT.Compute(vReal, vImag, FFT_SAMPLES, FFT_FORWARD); /* Compute FFT */    
+    //FFT.Compute(vReal, vImag, FFT_SAMPLES, FFT_FORWARD); /* Compute FFT */    
     xLogger.vAddLogMsg("CMP", (int16_t)(xTaskGetTickCount()-xRunTime));
     xRunTime=xTaskGetTickCount();
     //FFT.ComplexToMagnitude(vReal, vImag, FFT_SAMPLES); /* Compute magnitudes */
@@ -278,6 +278,6 @@ void  FFT_DeBias(double *pdSamples, int8_t n) {
     vReal[0]/=n; // DC
     uint16_t i, n2=n>>1;
     for(i=1; i<n2; i++) {
-        vReal[0]/=n2;
+        vReal[i]/=n2;
     }    
   }
