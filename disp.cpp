@@ -12,15 +12,6 @@
 #define DISPLAY_DC  PA1
 #define DISPLAY_RST PA4
 
-#define DISPLAY_LEN_S4  16
-#define DISPLAY_H_SZ  240
-#define DISPLAY_V_SZ  320
-
-#define D_FONT_SZ   4
-#define D_FONT_H    26
-
-#define D_FONT_S_SZ 2
-#define D_FONT_S_H  16
 
 extern ComLogger xLogger;
 

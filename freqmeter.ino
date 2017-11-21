@@ -128,14 +128,15 @@ static void vDispOutTask(void *pvParameters) {
                 //uint32_t xRunTime=xTaskGetTickCount();
                 //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
                 FFT_DeBias(vReal, FFT_SAMPLES);
-                xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256, 128, TASK_DELAY_MPU*FFT_SAMPLES);
+                xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256-D_FONT_S_H*2, 128, TASK_DELAY_MPU*FFT_SAMPLES);
                 //FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	/* Weigh data */
                // xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);    
                 //xLogger.vAddLogMsg("DT", (int16_t)(xTaskGetTickCount()-xRunTime));
                 for (uint16_t i = 0; i < FFT_SAMPLES; i++) vImag[i] = 0.0;
-                FFT.Compute(vReal, vImag, FFT_SAMPLES, FFT_FORWARD); /* Compute FFT */    
-                FFT.ComplexToMagnitude(vReal, vImag, FFT_SAMPLES); /* Compute magnitudes */
-                xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128, 128, ((1000/TASK_DELAY_MPU)>>1));    
+                //FFT.Compute(vReal, vImag, FFT_SAMPLES, FFT_FORWARD); /* Compute FFT */    
+                //FFT.ComplexToMagnitude(vReal, vImag, FFT_SAMPLES); /* Compute magnitudes */
+                FFT_ComputeMagnitude(vReal, vImag, FFT_SAMPLES); 
+                xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1));    
                 
                 if(MpuDrv::Mpu.Acquire()) {
                     MpuDrv::Mpu.FFT_StartSampling();
@@ -244,15 +245,17 @@ void TestChart(double signalFrequency) {
     uint32_t xRunTime=xTaskGetTickCount();
     //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
     FFT_DeBias(vReal, FFT_SAMPLES);
-    xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256, 128, TASK_DELAY_MPU*FFT_SAMPLES);
+    xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256-D_FONT_S_H*2, 128, TASK_DELAY_MPU*FFT_SAMPLES);
     xLogger.vAddLogMsg("CHD", (int16_t)(xTaskGetTickCount()-xRunTime));
     xRunTime=xTaskGetTickCount();
     //FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	/* Weigh data */
-    FFT.Compute(vReal, vImag, FFT_SAMPLES, FFT_FORWARD); /* Compute FFT */
+    FFT_ComputeMagnitude(vReal, vImag, FFT_SAMPLES); 
+    FFT.Compute(vReal, vImag, FFT_SAMPLES, FFT_FORWARD); /* Compute FFT */    
     xLogger.vAddLogMsg("CMP", (int16_t)(xTaskGetTickCount()-xRunTime));
     xRunTime=xTaskGetTickCount();
-    FFT.ComplexToMagnitude(vReal, vImag, FFT_SAMPLES); /* Compute magnitudes */
-    xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128, 128, ((1000/TASK_DELAY_MPU)>>1));    
+    //FFT.ComplexToMagnitude(vReal, vImag, FFT_SAMPLES); /* Compute magnitudes */
+    //FFT_Magnitude(vReal, vImag, FFT_SAMPLES); /* Compute magnitudes */
+    xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1));    
     xLogger.vAddLogMsg("CHD", (int16_t)(xTaskGetTickCount()-xRunTime));
 }
 
@@ -269,3 +272,12 @@ void  FFT_DeBias(double *pdSamples, int8_t n) {
     }
   }
   
+  void  FFT_ComputeMagnitude(double *vReal, double *vImag, int8_t n) {
+    FFT.Compute(vReal, vImag, n, FFT_FORWARD); /* Compute FFT */    
+    FFT.ComplexToMagnitude(vReal, vImag, n/2); /* Compute magnitudes */  
+    vReal[0]/=n; // DC
+    uint16_t i, n2=n>>1;
+    for(i=1; i<n2; i++) {
+        vReal[0]/=n2;
+    }    
+  }
