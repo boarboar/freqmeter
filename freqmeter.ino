@@ -125,20 +125,7 @@ static void vDispOutTask(void *pvParameters) {
             if(bSampReady) {
                 // there is no sampling at the miment, so we can use the buffer for FFT
                 //xLogger.vAddLogMsg("Sampling ready:", FFT_SAMPLES);
-                /*
-                //uint32_t xRunTime=xTaskGetTickCount();
-                //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
-                FFT_DeBias(vReal, FFT_SAMPLES);
-                xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256-D_FONT_S_H*2, 128, TASK_DELAY_MPU*FFT_SAMPLES);
-                //FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	// Weigh data 
-               // xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);    
-                //xLogger.vAddLogMsg("DT", (int16_t)(xTaskGetTickCount()-xRunTime));
-                for (uint16_t i = 0; i < FFT_SAMPLES; i++) vImag[i] = 0.0;
-                //FFT.Compute(vReal, vImag, FFT_SAMPLES, FFT_FORWARD); // Compute FFT 
-                //FFT.ComplexToMagnitude(vReal, vImag, FFT_SAMPLES); // Compute magnitudes 
-                FFT_ComputeMagnitude(vReal, vImag, FFT_SAMPLES); 
-                xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1));    
-                */
+                xDisplay.ShowStatus("Analyze...");
                 FFT_Do(false);
                 if(MpuDrv::Mpu.Acquire()) {
                     MpuDrv::Mpu.FFT_StartSampling();
@@ -243,24 +230,6 @@ void TestChart(double signalFrequency) {
         vReal[i] = ((amplitude * (sin((i * (PI*2 * cycles)) / FFT_SAMPLES))) / 2.0);/* Build data with positive and negative values*/
         vImag[i] = 0.0; //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
     }
-    /*
-    //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 256, 128);
-    uint32_t xRunTime=xTaskGetTickCount();
-    //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
-    FFT_DeBias(vReal, FFT_SAMPLES);
-    xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256-D_FONT_S_H*2, 128, TASK_DELAY_MPU*FFT_SAMPLES);
-    xLogger.vAddLogMsg("CHD", (int16_t)(xTaskGetTickCount()-xRunTime));
-    xRunTime=xTaskGetTickCount();
-    //FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	// Weigh data
-    FFT_ComputeMagnitude(vReal, vImag, FFT_SAMPLES); 
-    //FFT.Compute(vReal, vImag, FFT_SAMPLES, FFT_FORWARD); // Compute FFT 
-    xLogger.vAddLogMsg("CMP", (int16_t)(xTaskGetTickCount()-xRunTime));
-    xRunTime=xTaskGetTickCount();
-    //FFT.ComplexToMagnitude(vReal, vImag, FFT_SAMPLES); // Compute magnitudes
-    //FFT_Magnitude(vReal, vImag, FFT_SAMPLES); // Compute magnitudes 
-    xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1));    
-    xLogger.vAddLogMsg("CHD", (int16_t)(xTaskGetTickCount()-xRunTime));
-    */
     FFT_Do(true);
 }
 
@@ -273,12 +242,13 @@ void  FFT_Do(boolean doLogTiming) {
     if(doLogTiming)
         xLogger.vAddLogMsg("CH0", (int16_t)(xTaskGetTickCount()-xRunTime));
     xRunTime=xTaskGetTickCount();    
-    //FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_RECTANGLE, FFT_FORWARD);	/* Weigh data */
+    FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_HANN, FFT_FORWARD);	/* Weigh data */
     // xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);    
     //xLogger.vAddLogMsg("DT", (int16_t)(xTaskGetTickCount()-xRunTime));
     for (uint16_t i = 0; i < FFT_SAMPLES; i++) vImag[i] = 0.0;
     //FFT.Compute(vReal, vImag, FFT_SAMPLES, FFT_FORWARD); /* Compute FFT */    
     //FFT.ComplexToMagnitude(vReal, vImag, FFT_SAMPLES); /* Compute magnitudes */
+    
     FFT_ComputeMagnitude(vReal, vImag, FFT_SAMPLES); 
     if(doLogTiming)
         xLogger.vAddLogMsg("CMP", (int16_t)(xTaskGetTickCount()-xRunTime));

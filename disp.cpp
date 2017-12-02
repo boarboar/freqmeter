@@ -20,11 +20,13 @@ Adafruit_ILI9341_STM tft = Adafruit_ILI9341_STM( DISPLAY_CS, DISPLAY_DC, DISPLAY
 void Display::Init() {
  
 
-    pinMode(DISPLAY_LED, PWM);
-    pwmWrite(DISPLAY_LED, 16000);
+    //pinMode(DISPLAY_LED, PWM);
+    //pwmWrite(DISPLAY_LED, 16000);
+    pinMode(DISPLAY_LED, OUTPUT);
+    digitalWrite(DISPLAY_LED, HIGH);
 
     tft.begin();    
-    tft.setRotation(2);
+    //tft.setRotation(2);
     tft.fillScreen(ILI9341_BLACK);  
     tft.setTextSize(1);
     tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
@@ -65,13 +67,14 @@ void Display::Init() {
 }
 
 
-void Display::ShowStatus(const char *msg) {    
-    strncpy(out_buf, msg, DISPLAY_LEN_S4);
+void Display::ShowStatus(char *msg) {    
+    //strncpy(out_buf, msg, DISPLAY_LEN_S4);
     out_buf[DISPLAY_LEN_S4-1] = 0;
     //BufLen();
     tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
     tft.fillRect(0, 20, 240, 20, ILI9341_BLACK);
-    tft.drawString(out_buf,0,20,4);
+    //tft.drawString(out_buf,0,20,4);
+    tft.drawString(msg,0,20,4);
 
 
 }
