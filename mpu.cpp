@@ -331,7 +331,7 @@ void  MpuDrv::FFT_SetSampling(double *dSamples, int8_t n) {
 
 void MpuDrv::FFT_StartSampling() {
   iSample=0;
-  iOverTimeCount1++;
+  iOverTimeCount1=0;
 }
 
 boolean MpuDrv::FFT_SamplingReady() {
