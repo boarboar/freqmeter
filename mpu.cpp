@@ -60,6 +60,7 @@ int16_t MpuDrv::init() {
   pdSample=NULL;
   nSample=0;
   iSample=0;
+  iOverTimeCount1 = 0;
 
   for(int i=0; i<MPU_FAIL_CNT_SZ; i++) fail_cnt[i]=0;
   //resetIntegrator();
@@ -120,7 +121,7 @@ int16_t MpuDrv::init() {
   return dmpStatus;
 }
 
-int16_t MpuDrv::cycle(uint16_t /*dt*/) {
+int16_t MpuDrv::cycle(uint16_t dt) {
   uint8_t i=0;
   bool settled=false;
   if (dmpStatus==ST_0 || dmpStatus==ST_FAIL) return -1;
@@ -240,6 +241,8 @@ int16_t MpuDrv::cycle(uint16_t /*dt*/) {
 
       //vImag[iSample]=0.0;
       iSample++;
+
+      if(dt>1) iOverTimeCount1++;
     }
     return settled ? 2 : 1;
   }      
@@ -328,10 +331,15 @@ void  MpuDrv::FFT_SetSampling(double *dSamples, int8_t n) {
 
 void MpuDrv::FFT_StartSampling() {
   iSample=0;
+  iOverTimeCount1++;
 }
 
 boolean MpuDrv::FFT_SamplingReady() {
   return iSample==nSample;
+}
+
+int16_t MpuDrv::FFT_GetOverTimeCount1() {
+  return iOverTimeCount1;
 }
 
 /*

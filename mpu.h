@@ -52,6 +52,7 @@ public:
   void FFT_SetSampling(double *dSamples, int8_t n);
   void FFT_StartSampling(); 
   boolean FFT_SamplingReady();
+  int16_t FFT_GetOverTimeCount1();
   
 protected:  
   MpuDrv();
@@ -86,6 +87,8 @@ protected:
   //double vImag[FFT_SAMPLES];
 
   int8_t nSample, iSample;
+  int8_t iOverTimeCount1;
+  
   double *pdSample;
   
   xSemaphoreHandle xIMUFree;

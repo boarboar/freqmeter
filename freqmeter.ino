@@ -58,6 +58,8 @@ Adafruit_GFX_AS : Load_fonts.h to be fixed:
 //#define TASK_DELAY_DISP 10000
 #define TASK_DELAY_MPU 1   // 1kHz
 
+#define NOISE_CUT_OFF   2
+
 Display xDisplay;
 ComLogger xLogger;
 
@@ -85,7 +87,8 @@ static void vSerialOutTask(void *pvParameters) {
 
 static void vDispOutTask(void *pvParameters) {
     //tft.drawString("Task started!",20,20,4);
-    //int16_t a[3];
+    int16_t a[3];
+    //int16_t iOverTimeCount1=0;
     
     TestChart(20); // 20Hz
     vTaskDelay(2000);
@@ -101,6 +104,7 @@ static void vDispOutTask(void *pvParameters) {
           
             if(MpuDrv::Mpu.Acquire()) {
                 bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
+                a[0] = MpuDrv::Mpu.FFT_GetOverTimeCount1();
                 //MpuDrv::Mpu.getRawAccel(a);                
                 MpuDrv::Mpu.Release();
                 //xDisplay.ShowData3(a, 0);
@@ -125,7 +129,8 @@ static void vDispOutTask(void *pvParameters) {
             if(bSampReady) {
                 // there is no sampling at the miment, so we can use the buffer for FFT
                 //xLogger.vAddLogMsg("Sampling ready:", FFT_SAMPLES);
-                xDisplay.ShowStatus("Analyze...");
+                //xDisplay.ShowStatus("Analyze...");
+                xDisplay.ShowData3(a);
                 FFT_Do(false);
                 if(MpuDrv::Mpu.Acquire()) {
                     MpuDrv::Mpu.FFT_StartSampling();
@@ -238,7 +243,7 @@ void  FFT_Do(boolean doLogTiming) {
     uint32_t xRunTime=xTaskGetTickCount();
     //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
     FFT_DeBias(vReal, FFT_SAMPLES);
-    xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256-D_FONT_S_H*2, 128, TASK_DELAY_MPU*FFT_SAMPLES);
+    xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256-D_FONT_S_H*2, 128, TASK_DELAY_MPU*FFT_SAMPLES, NOISE_CUT_OFF);
     if(doLogTiming)
         xLogger.vAddLogMsg("CH0", (int16_t)(xTaskGetTickCount()-xRunTime));
     xRunTime=xTaskGetTickCount();    
@@ -253,7 +258,7 @@ void  FFT_Do(boolean doLogTiming) {
     if(doLogTiming)
         xLogger.vAddLogMsg("CMP", (int16_t)(xTaskGetTickCount()-xRunTime));
     xRunTime=xTaskGetTickCount();
-    xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1));    
+    xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), NOISE_CUT_OFF);    
     if(doLogTiming)
         xLogger.vAddLogMsg("CH1", (int16_t)(xTaskGetTickCount()-xRunTime));            
 }
