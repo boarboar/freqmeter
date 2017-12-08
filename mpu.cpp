@@ -61,6 +61,7 @@ int16_t MpuDrv::init() {
   nSample=0;
   iSample=0;
   iOverTimeCount1 = 0;
+  iDataMissCount = 0;
 
   for(int i=0; i<MPU_FAIL_CNT_SZ; i++) fail_cnt[i]=0;
   //resetIntegrator();
@@ -152,10 +153,16 @@ int16_t MpuDrv::cycle(uint16_t dt) {
   } 
   // otherwise, check for DMP data ready interrupt (this should happen frequently)
 
-  if (!(mpuIntStatus & 0x02) && (fifoCount < packetSize) ) return 0; // nothing to read
+  if (!(mpuIntStatus & 0x02) && (fifoCount < packetSize) ) {
+    iDataMissCount++;
+    return 0; // nothing to read
+  }
   
   fifoCount = mpu.getFIFOCount();
-  if(fifoCount < packetSize) return 0; // ???
+  if(fifoCount < packetSize) {
+    iDataMissCount++;
+    return 0; // ???
+  }
   /*
   //while (fifoCount < packetSize && i++<5) { fifoCount = mpu.getFIFOCount(); yield(); } 
   while (fifoCount < packetSize && i++<5) { 
@@ -332,6 +339,7 @@ void  MpuDrv::FFT_SetSampling(double *dSamples, int8_t n) {
 void MpuDrv::FFT_StartSampling() {
   iSample=0;
   iOverTimeCount1=0;
+  iDataMissCount = 0; 
 }
 
 boolean MpuDrv::FFT_SamplingReady() {
@@ -340,6 +348,13 @@ boolean MpuDrv::FFT_SamplingReady() {
 
 int16_t MpuDrv::FFT_GetOverTimeCount1() {
   return iOverTimeCount1;
+}
+
+int16_t MpuDrv::FFT_GetDataMissCount() {
+  return iDataMissCount;
+}
+int16_t MpuDrv::FFT_GetDataSampCount() {
+  return iSample;
 }
 
 /*

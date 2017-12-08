@@ -53,6 +53,8 @@ public:
   void FFT_StartSampling(); 
   boolean FFT_SamplingReady();
   int16_t FFT_GetOverTimeCount1();
+  int16_t FFT_GetDataMissCount();
+  int16_t FFT_GetDataSampCount();
   
 protected:  
   MpuDrv();
@@ -88,6 +90,7 @@ protected:
 
   int8_t nSample, iSample;
   int8_t iOverTimeCount1;
+  int8_t iDataMissCount;
   
   double *pdSample;
   

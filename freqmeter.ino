@@ -74,6 +74,7 @@ boolean fMPUReady=false;
 static const uint16_t FFT_SAMPLES = 64; //This value MUST ALWAYS be a power of 2
 // with sampling at 1000 Hz, we get width 1000/2 = 500 Hz
 // discrete of (1000/2) / (64/2) = 500/32 = 15 Hz
+double vSamp[FFT_SAMPLES];
 double vReal[FFT_SAMPLES];
 double vImag[FFT_SAMPLES];  
 
@@ -88,6 +89,7 @@ static void vSerialOutTask(void *pvParameters) {
 static void vDispOutTask(void *pvParameters) {
     //tft.drawString("Task started!",20,20,4);
     int16_t a[3]={0,0,0};
+    int16_t i;
     //int16_t iOverTimeCount1=0;
     
     TestChart(20); // 20Hz
@@ -104,7 +106,12 @@ static void vDispOutTask(void *pvParameters) {
           
             if(MpuDrv::Mpu.Acquire()) {
                 bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
-                a[0] = MpuDrv::Mpu.FFT_GetOverTimeCount1();
+                if(bSampReady)
+                    for(i=0; i<FFT_SAMPLES; i++) vReal[i]=vSamp[i];
+                
+                a[0] = MpuDrv::Mpu.FFT_GetDataSampCount();
+                a[1] = MpuDrv::Mpu.FFT_GetOverTimeCount1();
+                a[2] = MpuDrv::Mpu.FFT_GetDataMissCount();
                 //MpuDrv::Mpu.getRawAccel(a);                
                 MpuDrv::Mpu.Release();
                 //xDisplay.ShowData3(a, 0);
@@ -188,7 +195,7 @@ void setup() {
     //Wire.begin(SCL_PIN, SDA_PIN);
     Wire.begin();
     MpuDrv::Mpu.init();
-    MpuDrv::Mpu.FFT_SetSampling(vReal, FFT_SAMPLES);
+    MpuDrv::Mpu.FFT_SetSampling(vSamp, FFT_SAMPLES);
 
     Serial.println("Starting...");
     digitalWrite(BOARD_LED_PIN, HIGH);
