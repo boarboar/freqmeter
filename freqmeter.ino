@@ -58,6 +58,8 @@ Adafruit_GFX_AS : Load_fonts.h to be fixed:
 //#define TASK_DELAY_DISP 10000
 #define TASK_DELAY_MPU 1   // 1kHz
 
+//#define TASK_DELAY_MPU 3   //  334 Hz
+
 #define NOISE_CUT_OFF   3
 
 Display xDisplay;
@@ -112,7 +114,9 @@ static void vDispOutTask(void *pvParameters) {
                 a[0] = MpuDrv::Mpu.FFT_GetDataSampCount();
                 a[1] = MpuDrv::Mpu.FFT_GetOverTimeCount1();
                 a[2] = MpuDrv::Mpu.FFT_GetDataMissCount();
-                //MpuDrv::Mpu.getRawAccel(a);                
+                //MpuDrv::Mpu.getRawAccel(a);           
+
+                //MpuDrv::Mpu.FFT_StartSampling();
                 MpuDrv::Mpu.Release();
                 //xDisplay.ShowData3(a, 0);
             } 
@@ -139,10 +143,12 @@ static void vDispOutTask(void *pvParameters) {
                 //xDisplay.ShowStatus("Analyze...");
                 xDisplay.ShowData3(a);
                 FFT_Do(false);
+                
                 if(MpuDrv::Mpu.Acquire()) {
                     MpuDrv::Mpu.FFT_StartSampling();
                     MpuDrv::Mpu.Release();                
                 }  
+                
                 
             }
         }

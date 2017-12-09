@@ -90,7 +90,7 @@ protected:
 
   int8_t nSample, iSample;
   int8_t iOverTimeCount1;
-  int8_t iDataMissCount;
+  int16_t iDataMissCount;
   
   double *pdSample;
   

@@ -154,13 +154,15 @@ int16_t MpuDrv::cycle(uint16_t dt) {
   // otherwise, check for DMP data ready interrupt (this should happen frequently)
 
   if (!(mpuIntStatus & 0x02) && (fifoCount < packetSize) ) {
-    iDataMissCount++;
+    if(dmpStatus==ST_READY && iSample<nSample)//FFT
+      iDataMissCount++;
     return 0; // nothing to read
   }
   
   fifoCount = mpu.getFIFOCount();
   if(fifoCount < packetSize) {
-    iDataMissCount++;
+    if(dmpStatus==ST_READY && iSample<nSample)//FFT
+      iDataMissCount++;
     return 0; // ???
   }
   /*
