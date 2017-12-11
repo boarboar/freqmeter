@@ -90,7 +90,7 @@ static void vSerialOutTask(void *pvParameters) {
 
 static void vDispOutTask(void *pvParameters) {
     //tft.drawString("Task started!",20,20,4);
-    int16_t a[3]={0,0,0};
+    int16_t a[5]={0,0,0,0,0};
     int16_t i;
     //int16_t iOverTimeCount1=0;
     
@@ -114,6 +114,9 @@ static void vDispOutTask(void *pvParameters) {
                 a[0] = MpuDrv::Mpu.FFT_GetDataSampCount();
                 a[1] = MpuDrv::Mpu.FFT_GetOverTimeCount1();
                 a[2] = MpuDrv::Mpu.FFT_GetDataMissCount();
+                a[3] = MpuDrv::Mpu.FFT_GetFIFOOvflCount();
+                a[4] = MpuDrv::Mpu.FFT_GetFIFOXcsCount();
+                
                 //MpuDrv::Mpu.getRawAccel(a);           
 
                 //MpuDrv::Mpu.FFT_StartSampling();
@@ -141,7 +144,7 @@ static void vDispOutTask(void *pvParameters) {
                 // there is no sampling at the miment, so we can use the buffer for FFT
                 //xLogger.vAddLogMsg("Sampling ready:", FFT_SAMPLES);
                 //xDisplay.ShowStatus("Analyze...");
-                xDisplay.ShowData3(a);
+                xDisplay.ShowData(a, 5);
                 FFT_Do(false);
                 
                 if(MpuDrv::Mpu.Acquire()) {

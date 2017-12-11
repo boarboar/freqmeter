@@ -62,6 +62,8 @@ int16_t MpuDrv::init() {
   iSample=0;
   iOverTimeCount1 = 0;
   iDataMissCount = 0;
+  iFIFOOvflCount = 0;
+  iFIFOXcsCount = 0;
 
   for(int i=0; i<MPU_FAIL_CNT_SZ; i++) fail_cnt[i]=0;
   //resetIntegrator();
@@ -149,6 +151,8 @@ int16_t MpuDrv::cycle(uint16_t dt) {
     mpu.resetFIFO();
     fifoCount=0;
     fail_cnt[MPU_FAIL_FIFOOVFL_IDX]++;  // overfloods with the alarms
+    if(dmpStatus==ST_READY && iSample<nSample)//FFT
+      iFIFOOvflCount++;
     return -2;
   } 
   // otherwise, check for DMP data ready interrupt (this should happen frequently)
@@ -185,6 +189,8 @@ int16_t MpuDrv::cycle(uint16_t dt) {
     mpu.resetFIFO();
     fifoCount=0;
     fail_cnt[MPU_FAIL_FIFOEXCESS_IDX]++; // overfloods with the alarms
+    if(dmpStatus==ST_READY && iSample<nSample)//FFT
+      iFIFOXcsCount++;
     return -3;
   }   
     
@@ -342,6 +348,8 @@ void MpuDrv::FFT_StartSampling() {
   iSample=0;
   iOverTimeCount1=0;
   iDataMissCount = 0; 
+  iFIFOOvflCount = 0;
+  iFIFOXcsCount = 0;
 }
 
 boolean MpuDrv::FFT_SamplingReady() {

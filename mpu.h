@@ -55,6 +55,8 @@ public:
   int16_t FFT_GetOverTimeCount1();
   int16_t FFT_GetDataMissCount();
   int16_t FFT_GetDataSampCount();
+  int16_t FFT_GetFIFOOvflCount();
+  int16_t FFT_GetFIFOXcsCount();
   
 protected:  
   MpuDrv();
@@ -89,8 +91,10 @@ protected:
   //double vImag[FFT_SAMPLES];
 
   int8_t nSample, iSample;
-  int8_t iOverTimeCount1;
+  int16_t iOverTimeCount1;
   int16_t iDataMissCount;
+  int16_t iFIFOOvflCount;
+  int16_t iFIFOXcsCount;
   
   double *pdSample;
   

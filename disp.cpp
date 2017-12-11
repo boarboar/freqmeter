@@ -79,12 +79,14 @@ void Display::ShowStatus(char *msg) {
 
 }
 
-void Display::ShowData3(const int16_t d[3], int row) {
-    itoa(d[0], out_buf);
-    strcat(out_buf, " ");
-    itoa_cat(d[1], out_buf);
-    strcat(out_buf, " ");
-    itoa_cat(d[2], out_buf);
+void Display::ShowData(const int16_t d[3], int ndata, int row) {
+    if(!ndata) return;
+    if(ndata>6) ndata=6;
+    *out_buf = 0;
+    for(int i=0; i<ndata; i++) {
+        itoa_cat(d[i], out_buf);
+        if(i<ndata-1) strcat(out_buf, " ");
+    }
     tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
     //tft.fillRect(0, row*D_FONT_H, DISPLAY_H_SZ, D_FONT_H, ILI9341_BLACK);
     int16_t dx = tft.drawString(out_buf,0,row*D_FONT_H, D_FONT_SZ);
