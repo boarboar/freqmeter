@@ -366,6 +366,12 @@ int16_t MpuDrv::FFT_GetDataMissCount() {
 int16_t MpuDrv::FFT_GetDataSampCount() {
   return iSample;
 }
+int16_t MpuDrv::FFT_GetFIFOOvflCount() {
+  return iFIFOOvflCount;
+}
+int16_t MpuDrv::FFT_GetFIFOXcsCount() {
+  return iFIFOXcsCount;
+}
 
 /*
 boolean MpuDrv::FFT_SamplingReady(int16_t *dst, int32_t sz) {

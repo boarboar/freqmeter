@@ -54,7 +54,8 @@ Adafruit_GFX_AS : Load_fonts.h to be fixed:
 */
 
 #define TASK_DELAY_LOG 10
-#define TASK_DELAY_DISP 100
+#define TASK_DELAY_DISP 10
+//#define TASK_DELAY_DISP 100
 //#define TASK_DELAY_DISP 10000
 #define TASK_DELAY_MPU 1   // 1kHz
 
@@ -144,14 +145,15 @@ static void vDispOutTask(void *pvParameters) {
                 // there is no sampling at the miment, so we can use the buffer for FFT
                 //xLogger.vAddLogMsg("Sampling ready:", FFT_SAMPLES);
                 //xDisplay.ShowStatus("Analyze...");
-                xDisplay.ShowData(a, 5);
-                FFT_Do(false);
+                //xDisplay.ShowData(a, 5);
+                //FFT_Do(false);
                 
                 if(MpuDrv::Mpu.Acquire()) {
                     MpuDrv::Mpu.FFT_StartSampling();
                     MpuDrv::Mpu.Release();                
                 }  
-                
+                xDisplay.ShowData(a, 5);
+                FFT_Do(false);
                 
             }
         }
