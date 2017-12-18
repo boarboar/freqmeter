@@ -57,6 +57,7 @@ public:
   int16_t FFT_GetDataSampCount();
   int16_t FFT_GetFIFOOvflCount();
   int16_t FFT_GetFIFOXcsCount();
+  int16_t FFT_GetSampleTime();
   
 protected:  
   MpuDrv();
@@ -95,11 +96,12 @@ protected:
   int16_t iDataMissCount;
   int16_t iFIFOOvflCount;
   int16_t iFIFOXcsCount;
+  int16_t nSampleTime;
   
   double *pdSample;
   
   xSemaphoreHandle xIMUFree;
-  TickType_t xLastWakeTime, xStart;
+  TickType_t xLastWakeTime, xStart, xStartSample;
 };
 
 #endif /* _UMP_MPU_H_ */

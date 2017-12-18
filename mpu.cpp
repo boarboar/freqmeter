@@ -64,6 +64,7 @@ int16_t MpuDrv::init() {
   iDataMissCount = 0;
   iFIFOOvflCount = 0;
   iFIFOXcsCount = 0;
+  nSampleTime = 0;
 
   for(int i=0; i<MPU_FAIL_CNT_SZ; i++) fail_cnt[i]=0;
   //resetIntegrator();
@@ -256,6 +257,8 @@ int16_t MpuDrv::cycle(uint16_t dt) {
 
       //vImag[iSample]=0.0;
       iSample++;
+      if(iSample==nSample)
+        nSampleTime=xTaskGetTickCount()-xStartSample;
 
       if(dt>1) iOverTimeCount1++;
     }
@@ -350,6 +353,7 @@ void MpuDrv::FFT_StartSampling() {
   iDataMissCount = 0; 
   iFIFOOvflCount = 0;
   iFIFOXcsCount = 0;
+  xStartSample=xTaskGetTickCount();
 }
 
 boolean MpuDrv::FFT_SamplingReady() {
@@ -371,6 +375,9 @@ int16_t MpuDrv::FFT_GetFIFOOvflCount() {
 }
 int16_t MpuDrv::FFT_GetFIFOXcsCount() {
   return iFIFOXcsCount;
+}
+int16_t MpuDrv::FFT_GetSampleTime() {
+  return nSampleTime;
 }
 
 /*

@@ -91,7 +91,7 @@ static void vSerialOutTask(void *pvParameters) {
 
 static void vDispOutTask(void *pvParameters) {
     //tft.drawString("Task started!",20,20,4);
-    int16_t a[5]={0,0,0,0,0};
+    int16_t a[6]={0,0,0,0,0,0};
     int16_t i;
     //int16_t iOverTimeCount1=0;
     
@@ -117,34 +117,11 @@ static void vDispOutTask(void *pvParameters) {
                 a[2] = MpuDrv::Mpu.FFT_GetDataMissCount();
                 a[3] = MpuDrv::Mpu.FFT_GetFIFOOvflCount();
                 a[4] = MpuDrv::Mpu.FFT_GetFIFOXcsCount();
-                
-                //MpuDrv::Mpu.getRawAccel(a);           
-
-                //MpuDrv::Mpu.FFT_StartSampling();
+                a[5] = MpuDrv::Mpu.FFT_GetSampleTime();
                 MpuDrv::Mpu.Release();
-                //xDisplay.ShowData3(a, 0);
-            } 
-            /*
-            vTaskDelay(1);
-            if(MpuDrv::Mpu.Acquire()) {
-                MpuDrv::Mpu.getAccel(a);                
-                MpuDrv::Mpu.Release();
-                xDisplay.ShowData3(a, 1);
-            } 
-            */
-            /*
-            vTaskDelay(1);
-            if(MpuDrv::Mpu.Acquire()) {
-                MpuDrv::Mpu.getRawAccelMax(a);                
-                MpuDrv::Mpu.Release();
-                xDisplay.ShowData3(a, 2);
-            } 
-            */
-       
+           } 
+           
             if(bSampReady) {
-                // there is no sampling at the miment, so we can use the buffer for FFT
-                //xLogger.vAddLogMsg("Sampling ready:", FFT_SAMPLES);
-                //xDisplay.ShowStatus("Analyze...");
                 //xDisplay.ShowData(a, 5);
                 //FFT_Do(false);
                 
@@ -152,7 +129,7 @@ static void vDispOutTask(void *pvParameters) {
                     MpuDrv::Mpu.FFT_StartSampling();
                     MpuDrv::Mpu.Release();                
                 }  
-                xDisplay.ShowData(a, 5);
+                xDisplay.ShowData(a, 6);
                 FFT_Do(false);
                 
             }
