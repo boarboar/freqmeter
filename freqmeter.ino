@@ -111,13 +111,15 @@ static void vDispOutTask(void *pvParameters) {
                 bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
                 if(bSampReady)
                     for(i=0; i<FFT_SAMPLES; i++) vReal[i]=vSamp[i];
-                
+                /*
                 a[0] = MpuDrv::Mpu.FFT_GetDataSampCount();
                 a[1] = MpuDrv::Mpu.FFT_GetOverTimeCount1();
                 a[2] = MpuDrv::Mpu.FFT_GetDataMissCount();
                 a[3] = MpuDrv::Mpu.FFT_GetFIFOOvflCount();
                 a[4] = MpuDrv::Mpu.FFT_GetFIFOXcsCount();
                 a[5] = MpuDrv::Mpu.FFT_GetSampleTime();
+                */
+                a[0] = MpuDrv::Mpu.FFT_GetSampleTime();
                 MpuDrv::Mpu.Release();
            } 
            
@@ -129,7 +131,7 @@ static void vDispOutTask(void *pvParameters) {
                     MpuDrv::Mpu.FFT_StartSampling();
                     MpuDrv::Mpu.Release();                
                 }  
-                xDisplay.ShowData(a, 6);
+                xDisplay.ShowData(a, 1);
                 FFT_Do(false);
                 
             }
@@ -255,8 +257,8 @@ void  FFT_Do(boolean doLogTiming) {
     xRunTime=xTaskGetTickCount();
     //xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), NOISE_CUT_OFF);    
 
-    FFT_Log(vReal, FFT_SAMPLES);
-    xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 100);    
+    FFT_Log(vReal, (FFT_SAMPLES>>1));
+    xDisplay.ShowChartPlusMax(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 100);    
     
     if(doLogTiming)
         xLogger.vAddLogMsg("CH1", (int16_t)(xTaskGetTickCount()-xRunTime));            
