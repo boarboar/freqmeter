@@ -253,7 +253,11 @@ void  FFT_Do(boolean doLogTiming) {
     if(doLogTiming)
         xLogger.vAddLogMsg("CMP", (int16_t)(xTaskGetTickCount()-xRunTime));
     xRunTime=xTaskGetTickCount();
-    xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), NOISE_CUT_OFF);    
+    //xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), NOISE_CUT_OFF);    
+
+    FFT_Log(vReal, FFT_SAMPLES);
+    xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 100);    
+    
     if(doLogTiming)
         xLogger.vAddLogMsg("CH1", (int16_t)(xTaskGetTickCount()-xRunTime));            
 }
@@ -279,4 +283,14 @@ void  FFT_DeBias(double *pdSamples, int8_t n) {
     for(i=1; i<n2; i++) {
         vReal[i]/=n2;
     }    
+  }
+
+void  FFT_Log(double *pdSamples, int8_t n) {
+    uint16_t i;
+    for(i=0; i<n; i++) {
+        if(pdSamples[i]>=1.0)
+            pdSamples[i]=20.0*log10(pdSamples[i]);
+        else     
+            pdSamples[i]=0.0;
+    }
   }
