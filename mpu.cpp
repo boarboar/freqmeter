@@ -256,8 +256,10 @@ int16_t MpuDrv::cycle(uint16_t dt) {
       */
 
       //vImag[iSample]=0.0;
+      if(iSample==0) // start sampling
+        xStartSample=xTaskGetTickCount();
       iSample++;
-      if(iSample==nSample)
+      if(iSample==nSample) // finish sampling
         nSampleTime=xTaskGetTickCount()-xStartSample;
 
       if(dt>1) iOverTimeCount1++;
@@ -353,7 +355,7 @@ void MpuDrv::FFT_StartSampling() {
   iDataMissCount = 0; 
   iFIFOOvflCount = 0;
   iFIFOXcsCount = 0;
-  xStartSample=xTaskGetTickCount();
+  //xStartSample=xTaskGetTickCount();
 }
 
 boolean MpuDrv::FFT_SamplingReady() {
