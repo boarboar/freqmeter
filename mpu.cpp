@@ -137,6 +137,8 @@ int16_t MpuDrv::cycle(uint16_t dt) {
     need_reset=1;
     data_ready=0;
     fail_cnt[MPU_FAIL_NODATA_IDX]++;
+    if(dmpStatus==ST_READY && iSample<nSample) //FFT
+      FFT_DoSampling(dt, false);
     return -10;
   }
 /*
@@ -152,22 +154,28 @@ int16_t MpuDrv::cycle(uint16_t dt) {
     mpu.resetFIFO();
     fifoCount=0;
     fail_cnt[MPU_FAIL_FIFOOVFL_IDX]++;  // overfloods with the alarms
-    if(dmpStatus==ST_READY && iSample<nSample)//FFT
+    if(dmpStatus==ST_READY && iSample<nSample) {//FFT
+      FFT_DoSampling(dt, false);
       iFIFOOvflCount++;
+    }
     return -2;
   } 
   // otherwise, check for DMP data ready interrupt (this should happen frequently)
 
   if (!(mpuIntStatus & 0x02) && (fifoCount < packetSize) ) {
-    if(dmpStatus==ST_READY && iSample<nSample)//FFT
-      iDataMissCount++;
+    if(dmpStatus==ST_READY && iSample<nSample) { //FFT
+      FFT_DoSampling(dt, false);
+      //iDataMissCount++;
+    }
     return 0; // nothing to read
   }
   
   fifoCount = mpu.getFIFOCount();
   if(fifoCount < packetSize) {
-    if(dmpStatus==ST_READY && iSample<nSample)//FFT
-      iDataMissCount++;
+    if(dmpStatus==ST_READY && iSample<nSample) { //FFT
+      FFT_DoSampling(dt, false);
+      //iDataMissCount++;
+    }
     return 0; // ???
   }
   /*
@@ -190,8 +198,10 @@ int16_t MpuDrv::cycle(uint16_t dt) {
     mpu.resetFIFO();
     fifoCount=0;
     fail_cnt[MPU_FAIL_FIFOEXCESS_IDX]++; // overfloods with the alarms
-    if(dmpStatus==ST_READY && iSample<nSample)//FFT
+    if(dmpStatus==ST_READY && iSample<nSample) { //FFT
+      FFT_DoSampling(dt, false);
       iFIFOXcsCount++;
+    }
     return -3;
   }   
     
@@ -235,35 +245,45 @@ int16_t MpuDrv::cycle(uint16_t dt) {
   if(dmpStatus==ST_READY) {
     data_ready=1; 
     /*
-    daa16.x=aa16.x-aa16_0.x;
-    daa16.y=aa16.y-aa16_0.y;
-    daa16.z=aa16.z-aa16_0.z;
-    aa16_0 = aa16; // always
-    if(aa16.x > aa16_max.x) aa16_max.x=aa16.x;
-    if(aa16.y > aa16_max.y) aa16_max.y=aa16.y;
-    if(aa16.z > aa16_max.z) aa16_max.z=aa16.z;
-    */
+    //daa16.x=aa16.x-aa16_0.x;
+    //daa16.y=aa16.y-aa16_0.y;
+    //daa16.z=aa16.z-aa16_0.z;
+    //aa16_0 = aa16; // always
+    //if(aa16.x > aa16_max.x) aa16_max.x=aa16.x;
+    //if(aa16.y > aa16_max.y) aa16_max.y=aa16.y;
+    //if(aa16.z > aa16_max.z) aa16_max.z=aa16.z;
+    
     // FFT
     if(iSample<nSample && pdSample!=NULL) {
       pdSample[iSample]=aa16.z-aa16_0.z;
 
-      /*
-      pdSample[iSample]=sqrt(
-        (int32_t)(aa16.x-aa16_0.x)*(aa16.x-aa16_0.x)+
-        (int32_t)(aa16.y-aa16_0.y)*(aa16.y-aa16_0.y)+
-        (int32_t)(aa16.z-aa16_0.z)*(aa16.z-aa16_0.z)
-      );
-      */
+      
+    //  pdSample[iSample]=sqrt(
+    //    (int32_t)(aa16.x-aa16_0.x)*(aa16.x-aa16_0.x)+
+    //    (int32_t)(aa16.y-aa16_0.y)*(aa16.y-aa16_0.y)+
+    //    (int32_t)(aa16.z-aa16_0.z)*(aa16.z-aa16_0.z)
+    //  );
+      
 
       //vImag[iSample]=0.0;
-      if(iSample==0) // start sampling
-        xStartSample=xTaskGetTickCount();
       iSample++;
-      if(iSample==nSample) // finish sampling
-        nSampleTime=xTaskGetTickCount()-xStartSample;
 
-      if(dt>1) iOverTimeCount1++;
+      if(iSample==1) { // start sampling 
+        xStartSample=xTaskGetTickCount();
+        xLogger.vAddLogMsg("Start smp ", xStartSample);
+      }
+      
+      if(iSample==nSample) { // finish sampling
+        nSampleTime=(int16_t)(xTaskGetTickCount()-xStartSample);
+        xLogger.vAddLogMsg("Done smp ", xTaskGetTickCount(), " took ", nSampleTime);
+        xLogger.vAddLogMsg("Overtime ", iOverTimeCount1);
+      }
+
+      if(dt>1) iOverTimeCount1++;     
+      FFT_DoSampling(true);
     }
+    */
+    FFT_DoSampling(dt, true);
     return settled ? 2 : 1;
   }      
   return 10;
@@ -343,6 +363,35 @@ void MpuDrv::getAll(float* ypr, float* af, float* vf) {
   vf[0]=v.x; vf[1]=v.y; vf[2]=v.z;
 }  
 */
+
+void  MpuDrv::FFT_DoSampling(uint16_t dt, bool data) {
+ if(dmpStatus==ST_READY) {
+    if(iSample<nSample && pdSample!=NULL) {
+      if(!data)
+        pdSample[iSample]=aa16.z-aa16_0.z;
+      else {
+        iDataMissCount++;
+        if(iSample==0) return;
+        pdSample[iSample] = pdSample[iSample-1]; // primitive interpolation...
+      }
+      iSample++;
+
+      if(iSample==1) { // start sampling 
+        xStartSample=xTaskGetTickCount();
+        xLogger.vAddLogMsg("Start smp ", xStartSample);
+      }
+      
+      if(iSample==nSample) { // finish sampling
+        nSampleTime=(int16_t)(xTaskGetTickCount()-xStartSample);
+        xLogger.vAddLogMsg("Done smp ", xTaskGetTickCount(), " took ", nSampleTime);
+        xLogger.vAddLogMsg("Overtime ", iOverTimeCount1);
+      }
+
+      if(dt>1) iOverTimeCount1++;
+    }
+
+ }
+}
 
 void  MpuDrv::FFT_SetSampling(double *dSamples, int8_t n) {
   nSample = n;

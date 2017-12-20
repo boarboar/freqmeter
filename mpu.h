@@ -50,6 +50,7 @@ public:
   void  getAccel(int16_t a[3]);
 
   void FFT_SetSampling(double *dSamples, int8_t n);
+  void FFT_DoSampling(uint16_t dt, bool data);
   void FFT_StartSampling(); 
   boolean FFT_SamplingReady();
   int16_t FFT_GetOverTimeCount1();
