@@ -121,6 +121,7 @@ static void vDispOutTask(void *pvParameters) {
                 */
                 a[0] = MpuDrv::Mpu.FFT_GetSampleTime();
                 a[1] = MpuDrv::Mpu.FFT_GetDataMissCount();
+                a[2] = MpuDrv::Mpu.FFT_GetOverTimeCount1();                
                 MpuDrv::Mpu.Release();
            } 
            
@@ -132,7 +133,7 @@ static void vDispOutTask(void *pvParameters) {
                     MpuDrv::Mpu.FFT_StartSampling();
                     MpuDrv::Mpu.Release();                
                 }  
-                xDisplay.ShowData(a, 2);
+                xDisplay.ShowData(a, 3);
                 FFT_Do(false);
                 
             }
@@ -146,11 +147,14 @@ static void vDispOutTask(void *pvParameters) {
 
 static void vIMU_Task(void *pvParameters) {
     int16_t mpu_res=0;    
+    TickType_t xLastWakeTime=xTaskGetTickCount();
     xLogger.vAddLogMsg("IMU Task started.");
     for (;;) { 
       vTaskDelay(TASK_DELAY_MPU); 
       if(MpuDrv::Mpu.Acquire()) {
-        mpu_res = MpuDrv::Mpu.cycle_dt();               
+        //mpu_res = MpuDrv::Mpu.cycle_dt();        
+        mpu_res = MpuDrv::Mpu.cycle((uint16_t)(xTaskGetTickCount()-xLastWakeTime));        
+        xLastWakeTime=xTaskGetTickCount();       
         MpuDrv::Mpu.Release();
       } else continue;
       if(mpu_res==2) {

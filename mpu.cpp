@@ -244,45 +244,6 @@ int16_t MpuDrv::cycle(uint16_t dt) {
   
   if(dmpStatus==ST_READY) {
     data_ready=1; 
-    /*
-    //daa16.x=aa16.x-aa16_0.x;
-    //daa16.y=aa16.y-aa16_0.y;
-    //daa16.z=aa16.z-aa16_0.z;
-    //aa16_0 = aa16; // always
-    //if(aa16.x > aa16_max.x) aa16_max.x=aa16.x;
-    //if(aa16.y > aa16_max.y) aa16_max.y=aa16.y;
-    //if(aa16.z > aa16_max.z) aa16_max.z=aa16.z;
-    
-    // FFT
-    if(iSample<nSample && pdSample!=NULL) {
-      pdSample[iSample]=aa16.z-aa16_0.z;
-
-      
-    //  pdSample[iSample]=sqrt(
-    //    (int32_t)(aa16.x-aa16_0.x)*(aa16.x-aa16_0.x)+
-    //    (int32_t)(aa16.y-aa16_0.y)*(aa16.y-aa16_0.y)+
-    //    (int32_t)(aa16.z-aa16_0.z)*(aa16.z-aa16_0.z)
-    //  );
-      
-
-      //vImag[iSample]=0.0;
-      iSample++;
-
-      if(iSample==1) { // start sampling 
-        xStartSample=xTaskGetTickCount();
-        xLogger.vAddLogMsg("Start smp ", xStartSample);
-      }
-      
-      if(iSample==nSample) { // finish sampling
-        nSampleTime=(int16_t)(xTaskGetTickCount()-xStartSample);
-        xLogger.vAddLogMsg("Done smp ", xTaskGetTickCount(), " took ", nSampleTime);
-        xLogger.vAddLogMsg("Overtime ", iOverTimeCount1);
-      }
-
-      if(dt>1) iOverTimeCount1++;     
-      FFT_DoSampling(true);
-    }
-    */
     FFT_DoSampling(dt, true);
     return settled ? 2 : 1;
   }      
