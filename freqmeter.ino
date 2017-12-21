@@ -152,9 +152,9 @@ static void vIMU_Task(void *pvParameters) {
     for (;;) { 
       vTaskDelay(TASK_DELAY_MPU); 
       if(MpuDrv::Mpu.Acquire()) {
-        //mpu_res = MpuDrv::Mpu.cycle_dt();        
-        mpu_res = MpuDrv::Mpu.cycle((uint16_t)(xTaskGetTickCount()-xLastWakeTime));        
-        xLastWakeTime=xTaskGetTickCount();       
+        mpu_res = MpuDrv::Mpu.cycle_dt();        
+        //mpu_res = MpuDrv::Mpu.cycle((uint16_t)(xTaskGetTickCount()-xLastWakeTime));        
+        //xLastWakeTime=xTaskGetTickCount();       
         MpuDrv::Mpu.Release();
       } else continue;
       if(mpu_res==2) {
