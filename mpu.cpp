@@ -129,8 +129,7 @@ int16_t MpuDrv::cycle(uint16_t dt) {
   uint8_t i=0;
   bool settled=false;
   if (dmpStatus==ST_0 || dmpStatus==ST_FAIL) return -1;
-
-  //if(data_ready && (micros()-start)/1000000L>1) { // micros()-start  = NEED TO BE FIXED!!!!
+/*
   if(data_ready && (xTaskGetTickCount()-xLastWakeTime)/1000L>1) { 
     // no data from MPU after 1sec
     //xLogger.vAddLogMsg("MPU - no data in 1s!");
@@ -141,6 +140,7 @@ int16_t MpuDrv::cycle(uint16_t dt) {
       FFT_DoSampling(dt, false);
     return -10;
   }
+  */
 /*
     // wait for MPU interrupt or extra packet(s) available
     if (!mpuInterrupt && fifoCount < packetSize) return ;
@@ -197,18 +197,22 @@ int16_t MpuDrv::cycle(uint16_t dt) {
   if(fifoCount >0) { 
     mpu.resetFIFO();
     fifoCount=0;
+    /*
     fail_cnt[MPU_FAIL_FIFOEXCESS_IDX]++; // overfloods with the alarms
     if(dmpStatus==ST_READY && iSample<nSample) { //FFT
       FFT_DoSampling(dt, false);
       iFIFOXcsCount++;
     }
     return -3;
+    */
   }   
     
-  mpu.dmpGetQuaternion(q16, fifoBuffer);
+  //mpu.dmpGetQuaternion(q16, fifoBuffer);
   mpu.dmpGetAccel(&aa16, fifoBuffer);
     
-  if(dmpStatus==ST_WUP && count%200==1) { // warmup covergence state, check every 200th reading: 1,201,401,...
+  if(dmpStatus==ST_WUP) {
+    if(count%200==1) { // warmup covergence state, check every 200th reading: 1,201,401,...
+  
     int16_t ad16[3];
     int32_t qe=0, ae=0, e;        
     ad16[0]=aa16.x-aa16_0.x; ad16[1]=aa16.y-aa16_0.y; ad16[2]=aa16.z-aa16_0.z;                   
@@ -227,9 +231,11 @@ int16_t MpuDrv::cycle(uint16_t dt) {
       //xCommMgr.vAddAlarm(CommManager::CM_EVENT, CommManager::CM_MODULE_IMU, MPU_FAIL_CONVTMO, -1); 
       settled=true;      
     }
+    aa16_0 = aa16;
+    }
 
-   for(i=0; i<4; i++) q16_0[i]=q16[i];
-   aa16_0 = aa16;
+   //for(i=0; i<4; i++) q16_0[i]=q16[i];
+   //aa16_0 = aa16;
         
    if(settled) {
       xLogger.vAddLogMsg("MPU converged");
@@ -339,16 +345,16 @@ void  MpuDrv::FFT_DoSampling(uint16_t dt, bool data) {
 
       if(iSample==1) { // start sampling 
         xStartSample=xTaskGetTickCount();
-        xLogger.vAddLogMsg("Start smp ", xStartSample);
+        //xLogger.vAddLogMsg("Start smp ", xStartSample);
       }
       
       if(iSample==nSample) { // finish sampling
         nSampleTime=(int16_t)(xTaskGetTickCount()-xStartSample);
-        xLogger.vAddLogMsg("Done smp ", xTaskGetTickCount(), " took ", nSampleTime);
-        xLogger.vAddLogMsg("Overtime ", iOverTimeCount1);
+        //xLogger.vAddLogMsg("Done smp ", xTaskGetTickCount(), " took ", nSampleTime);
+        //xLogger.vAddLogMsg("Overtime ", iOverTimeCount1);
       }
 
-      if(dt>1) iOverTimeCount1++;
+      //if(dt>1) iOverTimeCount1++;
     }
 
  }

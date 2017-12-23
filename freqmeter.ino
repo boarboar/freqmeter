@@ -21,6 +21,19 @@ Adafruit_GFX_AS : Load_fonts.h to be fixed:
 */
 
 /*
+ * To enable timers in FreeRTOS
+ * <MapleFreeRTOS821.h>
+#include "utility/timers.h"
+ * 
+ * FreeRTOSConfig.h
+ * 
+#define configUSE_TIMERS       1
+#define configTIMER_TASK_PRIORITY   (tskIDLE_PRIORITY + 3)
+#define configTIMER_QUEUE_LENGTH    4
+#define configTIMER_TASK_STACK_DEPTH  (configMINIMAL_STACK_SIZE)
+ */
+
+/*
  * vacant ports
  * ===Side 1
  * PA0
@@ -126,15 +139,15 @@ static void vDispOutTask(void *pvParameters) {
            } 
            
             if(bSampReady) {
-                //xDisplay.ShowData(a, 5);
-                //FFT_Do(false);
+                xDisplay.ShowData(a, 3);
+                FFT_Do(false);
                 
                 if(MpuDrv::Mpu.Acquire()) {
                     MpuDrv::Mpu.FFT_StartSampling();
                     MpuDrv::Mpu.Release();                
                 }  
-                xDisplay.ShowData(a, 3);
-                FFT_Do(false);
+                //xDisplay.ShowData(a, 3);
+                //FFT_Do(false);
                 
             }
         }
@@ -170,7 +183,27 @@ static void vIMU_Task(void *pvParameters) {
     }
 }
 
-
+void vIMU_TimerCallback( TimerHandle_t xTimer )
+ {
+    //xLogger.vAddLogMsg("IMU Timer");
+    int16_t mpu_res = -1;
+    if(MpuDrv::Mpu.Acquire()) {
+        //mpu_res = MpuDrv::Mpu.cycle_dt();        
+        mpu_res = MpuDrv::Mpu.cycle(0);     
+        MpuDrv::Mpu.Release();
+      } else return;
+      if(mpu_res==2) {
+        // IMU settled
+        fMPUReady=true;
+        if(MpuDrv::Mpu.Acquire()) {
+            MpuDrv::Mpu.FFT_StartSampling();               
+            MpuDrv::Mpu.Release();
+          }
+        xLogger.vAddLogMsg("MPU Ready!");
+        xDisplay.ShowStatus("Ready");
+      }
+ }
+ 
 void setup() {
     digitalWrite(BOARD_LED_PIN, LOW);
     pinMode(BOARD_LED_PIN, OUTPUT);
@@ -208,14 +241,39 @@ void setup() {
                 NULL,
                 tskIDLE_PRIORITY + 1, // low
                 NULL);
-                
+                /*
     xTaskCreate(vIMU_Task,
                 "TaskIMU",
                 configMINIMAL_STACK_SIZE,
                 NULL,
                 tskIDLE_PRIORITY + 3, // max
                 NULL);
-                            
+*/
+    TimerHandle_t xIMU_Timer = xTimerCreate( 
+                     "IMU_Timer",
+                     3,                     
+                     pdTRUE,
+                     ( void * ) 0,
+                     vIMU_TimerCallback
+                   );
+
+    if( xIMU_Timer == NULL )
+     {
+         /* The timer was not created. */
+         Serial.println("IMU_Timer - failed to create");
+     }
+    else
+     {
+         /* Start the timer.  No block time is specified, and
+         even if one was it would be ignored because the RTOS
+         scheduler has not yet been started. */
+         if( xTimerStart( xIMU_Timer, 0 ) != pdPASS )
+         {
+             /* The timer could not be set into the Active
+             state. */
+             Serial.println("IMU_Timer - failed to start");
+         }
+     }                        
     vTaskStartScheduler();
 }
 
