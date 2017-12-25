@@ -204,6 +204,30 @@ void vIMU_TimerCallback( TimerHandle_t xTimer )
       }
  }
  
+void vIMU_TimerCallbackInit( TimerHandle_t xTimer )
+ {
+    //xLogger.vAddLogMsg("IMU Timer");
+    int16_t mpu_res = -1;
+    if(MpuDrv::Mpu.Acquire()) {
+        //mpu_res = MpuDrv::Mpu.cycle_dt();        
+        mpu_res = MpuDrv::Mpu.cycle(0);     
+        MpuDrv::Mpu.Release();
+      } else return;
+      if(mpu_res==2) {
+        // IMU settled
+        fMPUReady=true;
+        /*
+        if(MpuDrv::Mpu.Acquire()) {
+            MpuDrv::Mpu.FFT_StartSampling();               
+            MpuDrv::Mpu.Release();
+          }
+          */
+        xTimerStop( xTimer, 0 );  
+        xLogger.vAddLogMsg("MPU Ready!");
+        xDisplay.ShowStatus("Ready");
+      }
+ }
+
 void setup() {
     digitalWrite(BOARD_LED_PIN, LOW);
     pinMode(BOARD_LED_PIN, OUTPUT);
@@ -250,11 +274,11 @@ void setup() {
                 NULL);
 */
     TimerHandle_t xIMU_Timer = xTimerCreate( 
-                     "IMU_Timer",
-                     3,                     
+                     "IMU_Timer_INIT",
+                     8,                     
                      pdTRUE,
                      ( void * ) 0,
-                     vIMU_TimerCallback
+                     vIMU_TimerCallbackInit
                    );
 
     if( xIMU_Timer == NULL )
