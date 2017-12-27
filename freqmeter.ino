@@ -83,6 +83,8 @@ arduinoFFT FFT; /* Create FFT object */
 
 boolean fMPUReady=false;
 
+TimerHandle_t xIMU_TimerSMP=0;
+
 //int16_t fft_buf[64];
 
 // FFT
@@ -141,11 +143,13 @@ static void vDispOutTask(void *pvParameters) {
             if(bSampReady) {
                 xDisplay.ShowData(a, 3);
                 FFT_Do(false);
-                
+                FFT_StartSampling();
+                /*
                 if(MpuDrv::Mpu.Acquire()) {
                     MpuDrv::Mpu.FFT_StartSampling();
                     MpuDrv::Mpu.Release();                
-                }  
+                } 
+                */ 
                 //xDisplay.ShowData(a, 3);
                 //FFT_Do(false);
                 
@@ -158,6 +162,7 @@ static void vDispOutTask(void *pvParameters) {
     }
 }
 
+/*
 static void vIMU_Task(void *pvParameters) {
     int16_t mpu_res=0;    
     TickType_t xLastWakeTime=xTaskGetTickCount();
@@ -182,7 +187,9 @@ static void vIMU_Task(void *pvParameters) {
       }
     }
 }
+*/
 
+/*
 void vIMU_TimerCallback( TimerHandle_t xTimer )
  {
     //xLogger.vAddLogMsg("IMU Timer");
@@ -190,6 +197,7 @@ void vIMU_TimerCallback( TimerHandle_t xTimer )
     if(MpuDrv::Mpu.Acquire()) {
         //mpu_res = MpuDrv::Mpu.cycle_dt();        
         mpu_res = MpuDrv::Mpu.cycle(0);     
+        bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
         MpuDrv::Mpu.Release();
       } else return;
       if(mpu_res==2) {
@@ -203,7 +211,8 @@ void vIMU_TimerCallback( TimerHandle_t xTimer )
         xDisplay.ShowStatus("Ready");
       }
  }
- 
+ */
+
 void vIMU_TimerCallbackInit( TimerHandle_t xTimer )
  {
     //xLogger.vAddLogMsg("IMU Timer");
@@ -213,7 +222,7 @@ void vIMU_TimerCallbackInit( TimerHandle_t xTimer )
         mpu_res = MpuDrv::Mpu.cycle(0);     
         MpuDrv::Mpu.Release();
       } else return;
-      if(mpu_res==2) {
+    if(mpu_res==2) {
         // IMU settled
         fMPUReady=true;
         /*
@@ -225,7 +234,33 @@ void vIMU_TimerCallbackInit( TimerHandle_t xTimer )
         xTimerStop( xTimer, 0 );  
         xLogger.vAddLogMsg("MPU Ready!");
         xDisplay.ShowStatus("Ready");
-      }
+
+        FFT_StartSampling();
+        /*
+        if(MpuDrv::Mpu.Acquire()) {
+            MpuDrv::Mpu.FFT_StartSampling();               
+            MpuDrv::Mpu.Release();
+        }
+        */
+
+    }
+ }
+
+void vIMU_TimerCallbackSample( TimerHandle_t xTimer )
+ {
+    //xLogger.vAddLogMsg("IMU Timer");
+    boolean bSampReady=false;
+    if(!fMPUReady) return;
+    if(MpuDrv::Mpu.Acquire()) {
+        MpuDrv::Mpu.cycle(0);     
+        MpuDrv::Mpu.Release();
+      } else return;
+
+    if(bSampReady) {
+        xTimerStop( xTimer, 0 );  
+        xLogger.vAddLogMsg("Sample Ready!");
+        xDisplay.ShowStatus("Sample Ready");
+    }
  }
 
 void setup() {
@@ -273,6 +308,22 @@ void setup() {
                 tskIDLE_PRIORITY + 3, // max
                 NULL);
 */
+
+    xIMU_TimerSMP = xTimerCreate( 
+                     "IMU_Timer_SMP",
+                     4,                     
+                     pdTRUE,
+                     ( void * ) 0,
+                     vIMU_TimerCallbackSample
+                   );
+
+    if( xIMU_TimerSMP == NULL )
+     {
+         /* The timer was not created. */
+         Serial.println("IMU_Timer SMP - failed to create");
+     }
+
+
     TimerHandle_t xIMU_Timer = xTimerCreate( 
                      "IMU_Timer_INIT",
                      8,                     
@@ -322,6 +373,27 @@ void TestChart(double signalFrequency) {
     FFT_Do(true);
 }
 
+void  FFT_StartSampling() {            
+    if(MpuDrv::Mpu.Acquire()) {
+        MpuDrv::Mpu.FFT_StartSampling();               
+        MpuDrv::Mpu.Release();
+    }
+
+    if( xIMU_TimerSMP != NULL )
+     {
+         /* Start the timer.  No block time is specified, and
+         even if one was it would be ignored because the RTOS
+         scheduler has not yet been started. */
+         if( xTimerStart( xIMU_TimerSMP, 0 ) != pdPASS )
+         {
+             /* The timer could not be set into the Active
+             state. */
+             xLogger.vAddLogMsg("SMP FAIL STRT");             
+         } else {
+             xLogger.vAddLogMsg("SMP STRT OK");             
+         }
+     }      
+}
 
 void  FFT_Do(boolean doLogTiming) {    
     uint32_t xRunTime=xTaskGetTickCount();
