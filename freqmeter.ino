@@ -82,6 +82,7 @@ ComLogger xLogger;
 arduinoFFT FFT; /* Create FFT object */
 
 boolean fMPUReady=false;
+boolean fSAMPReady=false;
 
 TimerHandle_t xIMU_TimerSMP=0;
 
@@ -121,9 +122,10 @@ static void vDispOutTask(void *pvParameters) {
     boolean bSampReady=false;
     for (;;) {
         if(fMPUReady) {
-          
+          bSampReady=false;
             if(MpuDrv::Mpu.Acquire()) {
-                bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
+                //bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
+                bSampReady=fSAMPReady;
                 if(bSampReady)
                     for(i=0; i<FFT_SAMPLES; i++) vReal[i]=vSamp[i];
                 /*
@@ -141,9 +143,11 @@ static void vDispOutTask(void *pvParameters) {
            } 
            
             if(bSampReady) {
+              //xTimerStop( xIMU_TimerSMP, 0 ); //!!!!
+              xLogger.vAddLogMsg("DSP SMP  Ready!");
                 xDisplay.ShowData(a, 3);
                 FFT_Do(false);
-                FFT_StartSampling();
+                //FFT_StartSampling();
                 /*
                 if(MpuDrv::Mpu.Acquire()) {
                     MpuDrv::Mpu.FFT_StartSampling();
@@ -252,14 +256,19 @@ void vIMU_TimerCallbackSample( TimerHandle_t xTimer )
     boolean bSampReady=false;
     if(!fMPUReady) return;
     if(MpuDrv::Mpu.Acquire()) {
-        MpuDrv::Mpu.cycle(0);     
+        MpuDrv::Mpu.cycle(0);       
+        bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
         MpuDrv::Mpu.Release();
       } else return;
 
     if(bSampReady) {
-        xTimerStop( xTimer, 0 );  
+        xTimerStop( xIMU_TimerSMP, 0 );  
         xLogger.vAddLogMsg("Sample Ready!");
         xDisplay.ShowStatus("Sample Ready");
+        if(MpuDrv::Mpu.Acquire()) {
+          fSAMPReady=true;
+           MpuDrv::Mpu.Release();
+        }
     }
  }
 
@@ -311,7 +320,7 @@ void setup() {
 
     xIMU_TimerSMP = xTimerCreate( 
                      "IMU_Timer_SMP",
-                     4,                     
+                     2,                     
                      pdTRUE,
                      ( void * ) 0,
                      vIMU_TimerCallbackSample
@@ -373,7 +382,8 @@ void TestChart(double signalFrequency) {
     FFT_Do(true);
 }
 
-void  FFT_StartSampling() {            
+void  FFT_StartSampling() {     
+  fSAMPReady=false;       
     if(MpuDrv::Mpu.Acquire()) {
         MpuDrv::Mpu.FFT_StartSampling();               
         MpuDrv::Mpu.Release();
