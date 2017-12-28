@@ -148,7 +148,7 @@ static void vDispOutTask(void *pvParameters) {
                 xLogger.vAddLogMsg("DSP SMP  Ready!");
                 xDisplay.ShowData(a, 3);
                 FFT_Do(false);
-                //FFT_StartSampling();
+                FFT_StartSampling();
                 /*
                 if(MpuDrv::Mpu.Acquire()) {
                     MpuDrv::Mpu.FFT_StartSampling();
@@ -220,7 +220,7 @@ void vIMU_TimerCallback( TimerHandle_t xTimer )
 
 void vIMU_TimerCallbackInit( TimerHandle_t xTimer )
  {
-    //xLogger.vAddLogMsg("IMU Timer");
+    //xLogger.vAddLogMsg("IMU In Timer");
     int16_t mpu_res = -1;
     if(MpuDrv::Mpu.Acquire()) {
         //mpu_res = MpuDrv::Mpu.cycle_dt();        
@@ -236,7 +236,16 @@ void vIMU_TimerCallbackInit( TimerHandle_t xTimer )
             MpuDrv::Mpu.Release();
           }
           */
-        xTimerStop( xIMU_TimerInit, 10 );  
+        //xTimerStop( xIMU_TimerInit, 10 );  
+        if(xTimerStop( xIMU_TimerInit, 10 )==pdFAIL) {
+            xLogger.vAddLogMsg("Fail to stop!");    
+            uint8_t s=0;
+            for(int i=0; i<10; i++) {
+                digitalWrite(BOARD_LED_PIN, s);         
+                s=!s;
+                vTaskDelay(100);
+            }
+        }
         xLogger.vAddLogMsg("MPU Ready!");
         xDisplay.ShowStatus("Ready");
         vTaskDelay(2);
@@ -254,8 +263,10 @@ void vIMU_TimerCallbackInit( TimerHandle_t xTimer )
 void vIMU_TimerCallbackSample( TimerHandle_t xTimer )
  {
     //xLogger.vAddLogMsg("IMU Timer");
+  
+    if(!fMPUReady || fSAMPReady) return;
     boolean bSampReady=false;
-    if(!fMPUReady) return;
+      
     if(MpuDrv::Mpu.Acquire()) {
         MpuDrv::Mpu.cycle(0);       
         bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
@@ -273,8 +284,8 @@ void vIMU_TimerCallbackSample( TimerHandle_t xTimer )
             }
         }
         digitalWrite(BOARD_LED_PIN, HIGH);         
-        xLogger.vAddLogMsg("Sample Ready!");
-        xDisplay.ShowStatus("Sample Ready");
+        //xLogger.vAddLogMsg("Sample Ready!");
+        //xDisplay.ShowStatus("Sample Ready");
         if(MpuDrv::Mpu.Acquire()) {
           fSAMPReady=true;
           MpuDrv::Mpu.Release();
@@ -319,6 +330,7 @@ void setup() {
                 NULL,
                 tskIDLE_PRIORITY + 1, // low
                 NULL);
+                
                 /*
     xTaskCreate(vIMU_Task,
                 "TaskIMU",
@@ -330,7 +342,7 @@ void setup() {
 
     xIMU_TimerSMP = xTimerCreate( 
                      "IMU_Timer_SMP",
-                     2,                     
+                     3,                     
                      pdTRUE,
                      ( void * ) 0,
                      vIMU_TimerCallbackSample
@@ -411,7 +423,7 @@ void  FFT_StartSampling() {
              state. */
              xLogger.vAddLogMsg("SMP FAIL STRT");             
          } else {
-             xLogger.vAddLogMsg("SMP STRT OK");             
+             //xLogger.vAddLogMsg("SMP STRT OK");             
          }
      }      
 }
