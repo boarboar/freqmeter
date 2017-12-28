@@ -85,6 +85,7 @@ boolean fMPUReady=false;
 boolean fSAMPReady=false;
 
 TimerHandle_t xIMU_TimerSMP=0;
+TimerHandle_t xIMU_TimerInit=0;
 
 //int16_t fft_buf[64];
 
@@ -122,7 +123,7 @@ static void vDispOutTask(void *pvParameters) {
     boolean bSampReady=false;
     for (;;) {
         if(fMPUReady) {
-          bSampReady=false;
+            bSampReady=false;
             if(MpuDrv::Mpu.Acquire()) {
                 //bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
                 bSampReady=fSAMPReady;
@@ -144,7 +145,7 @@ static void vDispOutTask(void *pvParameters) {
            
             if(bSampReady) {
               //xTimerStop( xIMU_TimerSMP, 0 ); //!!!!
-              xLogger.vAddLogMsg("DSP SMP  Ready!");
+                xLogger.vAddLogMsg("DSP SMP  Ready!");
                 xDisplay.ShowData(a, 3);
                 FFT_Do(false);
                 //FFT_StartSampling();
@@ -235,10 +236,10 @@ void vIMU_TimerCallbackInit( TimerHandle_t xTimer )
             MpuDrv::Mpu.Release();
           }
           */
-        xTimerStop( xTimer, 0 );  
+        xTimerStop( xIMU_TimerInit, 10 );  
         xLogger.vAddLogMsg("MPU Ready!");
         xDisplay.ShowStatus("Ready");
-
+        vTaskDelay(2);
         FFT_StartSampling();
         /*
         if(MpuDrv::Mpu.Acquire()) {
@@ -262,12 +263,21 @@ void vIMU_TimerCallbackSample( TimerHandle_t xTimer )
       } else return;
 
     if(bSampReady) {
-        xTimerStop( xIMU_TimerSMP, 0 );  
+        if(xTimerStop( xIMU_TimerSMP, 10 )==pdFAIL) {
+            xLogger.vAddLogMsg("Fail to stop!");    
+            uint8_t s=0;
+            for(int i=0; i<10; i++) {
+                digitalWrite(BOARD_LED_PIN, s);         
+                s=!s;
+                vTaskDelay(100);
+            }
+        }
+        digitalWrite(BOARD_LED_PIN, HIGH);         
         xLogger.vAddLogMsg("Sample Ready!");
         xDisplay.ShowStatus("Sample Ready");
         if(MpuDrv::Mpu.Acquire()) {
           fSAMPReady=true;
-           MpuDrv::Mpu.Release();
+          MpuDrv::Mpu.Release();
         }
     }
  }
@@ -333,7 +343,7 @@ void setup() {
      }
 
 
-    TimerHandle_t xIMU_Timer = xTimerCreate( 
+    xIMU_TimerInit = xTimerCreate( 
                      "IMU_Timer_INIT",
                      8,                     
                      pdTRUE,
@@ -341,7 +351,7 @@ void setup() {
                      vIMU_TimerCallbackInit
                    );
 
-    if( xIMU_Timer == NULL )
+    if( xIMU_TimerInit == NULL )
      {
          /* The timer was not created. */
          Serial.println("IMU_Timer - failed to create");
@@ -351,7 +361,7 @@ void setup() {
          /* Start the timer.  No block time is specified, and
          even if one was it would be ignored because the RTOS
          scheduler has not yet been started. */
-         if( xTimerStart( xIMU_Timer, 0 ) != pdPASS )
+         if( xTimerStart( xIMU_TimerInit, 0 ) != pdPASS )
          {
              /* The timer could not be set into the Active
              state. */
@@ -382,8 +392,9 @@ void TestChart(double signalFrequency) {
     FFT_Do(true);
 }
 
-void  FFT_StartSampling() {     
-  fSAMPReady=false;       
+void  FFT_StartSampling() {    
+    digitalWrite(BOARD_LED_PIN, LOW); 
+    fSAMPReady=false;       
     if(MpuDrv::Mpu.Acquire()) {
         MpuDrv::Mpu.FFT_StartSampling();               
         MpuDrv::Mpu.Release();
