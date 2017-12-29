@@ -68,13 +68,8 @@ Adafruit_GFX_AS : Load_fonts.h to be fixed:
 
 #define TASK_DELAY_LOG 10
 #define TASK_DELAY_DISP 10
-//#define TASK_DELAY_DISP 100
-//#define TASK_DELAY_DISP 10000
-#define TASK_DELAY_MPU 1   // 1kHz
-
-//#define TASK_DELAY_MPU 3   //  334 Hz
-
-#define NOISE_CUT_OFF   3
+//#define TASK_DELAY_MPU 1   // 1kHz
+#define TASK_DELAY_MPU 3   // 333Hz
 
 Display xDisplay;
 ComLogger xLogger;
@@ -90,6 +85,9 @@ TimerHandle_t xIMU_TimerInit=0;
 //int16_t fft_buf[64];
 
 // FFT
+
+#define NOISE_CUT_OFF   4
+
 // https://github.com/kosme/arduinoFFT
 static const uint16_t FFT_SAMPLES = 64; //This value MUST ALWAYS be a power of 2
 // with sampling at 1000 Hz, we get width 1000/2 = 500 Hz
@@ -143,21 +141,11 @@ static void vDispOutTask(void *pvParameters) {
                 MpuDrv::Mpu.Release();
            } 
            
-            if(bSampReady) {
-              //xTimerStop( xIMU_TimerSMP, 0 ); //!!!!
-                xLogger.vAddLogMsg("DSP SMP  Ready!");
+            if(bSampReady) {             
+                //xLogger.vAddLogMsg("DSP SMP  Ready!");
                 xDisplay.ShowData(a, 3);
                 FFT_Do(false);
-                FFT_StartSampling();
-                /*
-                if(MpuDrv::Mpu.Acquire()) {
-                    MpuDrv::Mpu.FFT_StartSampling();
-                    MpuDrv::Mpu.Release();                
-                } 
-                */ 
-                //xDisplay.ShowData(a, 3);
-                //FFT_Do(false);
-                
+                FFT_StartSampling();                
             }
         }
         else {                        
@@ -220,53 +208,28 @@ void vIMU_TimerCallback( TimerHandle_t xTimer )
 
 void vIMU_TimerCallbackInit( TimerHandle_t xTimer )
  {
-    //xLogger.vAddLogMsg("IMU In Timer");
     int16_t mpu_res = -1;
     if(MpuDrv::Mpu.Acquire()) {
-        //mpu_res = MpuDrv::Mpu.cycle_dt();        
         mpu_res = MpuDrv::Mpu.cycle(0);     
         MpuDrv::Mpu.Release();
       } else return;
     if(mpu_res==2) {
         // IMU settled
         fMPUReady=true;
-        /*
-        if(MpuDrv::Mpu.Acquire()) {
-            MpuDrv::Mpu.FFT_StartSampling();               
-            MpuDrv::Mpu.Release();
-          }
-          */
-        //xTimerStop( xIMU_TimerInit, 10 );  
         if(xTimerStop( xIMU_TimerInit, 10 )==pdFAIL) {
             xLogger.vAddLogMsg("Fail to stop!");    
-            uint8_t s=0;
-            for(int i=0; i<10; i++) {
-                digitalWrite(BOARD_LED_PIN, s);         
-                s=!s;
-                vTaskDelay(100);
-            }
         }
         xLogger.vAddLogMsg("MPU Ready!");
         xDisplay.ShowStatus("Ready");
         vTaskDelay(2);
         FFT_StartSampling();
-        /*
-        if(MpuDrv::Mpu.Acquire()) {
-            MpuDrv::Mpu.FFT_StartSampling();               
-            MpuDrv::Mpu.Release();
-        }
-        */
-
     }
  }
 
 void vIMU_TimerCallbackSample( TimerHandle_t xTimer )
  {
-    //xLogger.vAddLogMsg("IMU Timer");
-  
     if(!fMPUReady || fSAMPReady) return;
-    boolean bSampReady=false;
-      
+    boolean bSampReady=false;     
     if(MpuDrv::Mpu.Acquire()) {
         MpuDrv::Mpu.cycle(0);       
         bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
@@ -276,12 +239,6 @@ void vIMU_TimerCallbackSample( TimerHandle_t xTimer )
     if(bSampReady) {
         if(xTimerStop( xIMU_TimerSMP, 10 )==pdFAIL) {
             xLogger.vAddLogMsg("Fail to stop!");    
-            uint8_t s=0;
-            for(int i=0; i<10; i++) {
-                digitalWrite(BOARD_LED_PIN, s);         
-                s=!s;
-                vTaskDelay(100);
-            }
         }
         digitalWrite(BOARD_LED_PIN, HIGH);         
         //xLogger.vAddLogMsg("Sample Ready!");
@@ -342,7 +299,7 @@ void setup() {
 
     xIMU_TimerSMP = xTimerCreate( 
                      "IMU_Timer_SMP",
-                     3,                     
+                     TASK_DELAY_MPU,                     
                      pdTRUE,
                      ( void * ) 0,
                      vIMU_TimerCallbackSample
@@ -375,8 +332,6 @@ void setup() {
          scheduler has not yet been started. */
          if( xTimerStart( xIMU_TimerInit, 0 ) != pdPASS )
          {
-             /* The timer could not be set into the Active
-             state. */
              Serial.println("IMU_Timer - failed to start");
          }
      }                        
@@ -459,7 +414,7 @@ void  FFT_Do(boolean doLogTiming) {
     xRunTime=xTaskGetTickCount();
 
 
-    xDisplay.ShowChartPlusMax(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 100);    
+    xDisplay.ShowChartPlusMax(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 100, NOISE_CUT_OFF);    
     
     if(doLogTiming)
         xLogger.vAddLogMsg("CH1", (int16_t)(xTaskGetTickCount()-xRunTime));            

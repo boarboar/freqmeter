@@ -210,14 +210,15 @@ void Display::ShowChartPlus(const double *pdVals, int16_t nvals,
 }
 
 void Display::ShowChartPlusMax(const double *pdVals, int16_t nvals, 
-        int16_t y, int16_t h, int16_t xlab, int16_t vmax) {
+        int16_t y, int16_t h, int16_t xlab, int16_t vmax, int16_t noise) {
     int16_t v, y0=y+h, xp;
     int8_t w, i;
     w=DISPLAY_H_SZ/(nvals);
     tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_BLACK);
     if(vmax<=0) return;
     for(i=0; i<nvals; i++) {
-        v=(int16_t)pdVals[i];         
+        v=(int16_t)pdVals[i];      
+        if(v<noise) continue;   
         v=(int16_t)( ((int32_t)v)*h / ((int32_t)vmax) );
         xp=i*(w);
         tft.fillRect(xp, y0-v, w-1, v, ILI9341_RED);

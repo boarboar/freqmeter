@@ -192,20 +192,15 @@ int16_t MpuDrv::cycle(uint16_t dt) {
   */
   // read a packet from FIFO
   mpu.getFIFOBytes(fifoBuffer, packetSize);
-  //mpu.resetFIFO(); fifoCount=0; // this is in case of overflows... 
+  mpu.resetFIFO(); fifoCount=0; // this is in case of overflows... 
+
+/*
   fifoCount -= packetSize;
   if(fifoCount >0) { 
     mpu.resetFIFO();
     fifoCount=0;
-    /*
-    fail_cnt[MPU_FAIL_FIFOEXCESS_IDX]++; // overfloods with the alarms
-    if(dmpStatus==ST_READY && iSample<nSample) { //FFT
-      FFT_DoSampling(dt, false);
-      iFIFOXcsCount++;
-    }
-    return -3;
-    */
   }   
+  */
     
   //mpu.dmpGetQuaternion(q16, fifoBuffer);
   mpu.dmpGetAccel(&aa16, fifoBuffer);
