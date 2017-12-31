@@ -49,7 +49,8 @@ public:
   //void  getRawAccelMax(int16_t a[3]);
   void  getAccel(int16_t a[3]);
 
-  void FFT_SetSampling(double *dSamples, int8_t n);
+  //void FFT_SetSampling(double *dSamples, int8_t n);
+  void FFT_SetSampling(int16_t *pdSamples, int8_t n);
   void FFT_DoSampling(uint16_t dt, bool data);
   void FFT_StartSampling(); 
   boolean FFT_SamplingReady();
@@ -99,7 +100,12 @@ protected:
   int16_t iFIFOXcsCount;
   int16_t nSampleTime;
   
-  double *pdSample;
+  //double *pdSample;
+  int16_t *pdSample;
+  int16_t iLastSampl;
+  int8_t iCountSampl;
+  int32_t iAccSampl;
+
   
   xSemaphoreHandle xIMUFree;
   TickType_t xLastWakeTime, xStart, xStartSample;

@@ -69,7 +69,10 @@ Adafruit_GFX_AS : Load_fonts.h to be fixed:
 #define TASK_DELAY_LOG 10
 #define TASK_DELAY_DISP 10
 //#define TASK_DELAY_MPU 1   // 1kHz
-#define TASK_DELAY_MPU 3   // 333Hz
+#define TASK_DELAY_MPU 2   // 500Hz
+//#define TASK_DELAY_MPU 3   // 333Hz
+//#define TASK_DELAY_MPU 4   // 250Hz
+//#define TASK_DELAY_MPU 8
 
 Display xDisplay;
 ComLogger xLogger;
@@ -82,8 +85,6 @@ boolean fSAMPReady=false;
 TimerHandle_t xIMU_TimerSMP=0;
 TimerHandle_t xIMU_TimerInit=0;
 
-//int16_t fft_buf[64];
-
 // FFT
 
 #define NOISE_CUT_OFF   4
@@ -92,7 +93,8 @@ TimerHandle_t xIMU_TimerInit=0;
 static const uint16_t FFT_SAMPLES = 64; //This value MUST ALWAYS be a power of 2
 // with sampling at 1000 Hz, we get width 1000/2 = 500 Hz
 // discrete of (1000/2) / (64/2) = 500/32 = 15 Hz
-double vSamp[FFT_SAMPLES];
+//double vSamp[FFT_SAMPLES];
+int16_t vSamp[FFT_SAMPLES];
 double vReal[FFT_SAMPLES];
 double vImag[FFT_SAMPLES];  
 
@@ -299,7 +301,7 @@ void setup() {
 
     xIMU_TimerSMP = xTimerCreate( 
                      "IMU_Timer_SMP",
-                     TASK_DELAY_MPU,                     
+                     TASK_DELAY_MPU,                   
                      pdTRUE,
                      ( void * ) 0,
                      vIMU_TimerCallbackSample

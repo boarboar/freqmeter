@@ -192,15 +192,16 @@ int16_t MpuDrv::cycle(uint16_t dt) {
   */
   // read a packet from FIFO
   mpu.getFIFOBytes(fifoBuffer, packetSize);
-  mpu.resetFIFO(); fifoCount=0; // this is in case of overflows... 
+  //mpu.resetFIFO(); fifoCount=0; // this is in case of overflows... 
 
-/*
   fifoCount -= packetSize;
+
+  
   if(fifoCount >0) { 
     mpu.resetFIFO();
     fifoCount=0;
   }   
-  */
+
     
   //mpu.dmpGetQuaternion(q16, fifoBuffer);
   mpu.dmpGetAccel(&aa16, fifoBuffer);
@@ -329,13 +330,47 @@ void MpuDrv::getAll(float* ypr, float* af, float* vf) {
 void  MpuDrv::FFT_DoSampling(uint16_t dt, bool data) {
  if(dmpStatus==ST_READY) {
     if(iSample<nSample && pdSample!=NULL) {
-      if(!data)
-        pdSample[iSample]=aa16.z-aa16_0.z;
+      if(!iSample && !data) return;
+      /*
+      if(data) {
+        iLastSampl=aa16.z-aa16_0.z;
+        if(iSample==0 || iSkipSampl==1) {
+          pdSample[iSample]=aa16.z-aa16_0.z;
+          iSkipSampl=0;
+        } else {
+           iSkipSampl=1;
+           return;
+        }
+      }
       else {
         iDataMissCount++;
         if(iSample==0) return;
-        pdSample[iSample] = pdSample[iSample-1]; // primitive interpolation...
+        if(iSkipSampl==0) {
+           iSkipSampl=1;
+           return;
+        }
+        //pdSample[iSample] = pdSample[iSample-1]; // primitive interpolation...
+        pdSample[iSample] = iLastSampl;
       }
+      */
+
+      if(data) {
+        //iAccSampl+=aa16.z-aa16_0.z;
+        iLastSampl=aa16.z-aa16_0.z;
+        iAccSampl+=iLastSampl;
+      } else {
+        iAccSampl+=iLastSampl;
+      }
+
+      if(iCountSampl==0) {
+        iCountSampl++;
+        return;
+      }
+
+      iCountSampl=0;
+      pdSample[iSample]=iAccSampl>>1;
+      iAccSampl=0;
+      
       iSample++;
 
       if(iSample==1) { // start sampling 
@@ -355,7 +390,8 @@ void  MpuDrv::FFT_DoSampling(uint16_t dt, bool data) {
  }
 }
 
-void  MpuDrv::FFT_SetSampling(double *dSamples, int8_t n) {
+//void  MpuDrv::FFT_SetSampling(double *dSamples, int8_t n) {
+void  MpuDrv::FFT_SetSampling(int16_t *dSamples, int8_t n) {
   nSample = n;
   pdSample = dSamples;
 }
@@ -366,6 +402,8 @@ void MpuDrv::FFT_StartSampling() {
   iDataMissCount = 0; 
   iFIFOOvflCount = 0;
   iFIFOXcsCount = 0;
+  iCountSampl=0;
+  iAccSampl=0;
   //xStartSample=xTaskGetTickCount();
 }
 
