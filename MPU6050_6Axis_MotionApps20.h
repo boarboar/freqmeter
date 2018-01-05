@@ -414,6 +414,7 @@ uint8_t MPU6050::dmpInitialize() {
             DEBUG_PRINTLN(F("Setting sample rate to 200Hz..."));
             //setRate(4); // 1khz / (1 + 4) = 200 Hz
             setRate(1); // 500 Hz
+            //setRate(3); // 250 Hz
             //setRate(0); // 1kHz
             //setRate(2); // 333 Hz
 

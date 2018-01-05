@@ -146,13 +146,16 @@ void Display::ShowChart0(const double *pdVals, int16_t nvals,
     int16_t vmax=0;
     int16_t v, y0=y+h/2, xp;
     int8_t w, i;
+    //xLogger.vAddLogMsg("N=", nvals); 
     if(!pdVals || nvals<=0 || h<=0) return;
+    //xLogger.vAddLogMsg("DO3"); 
     for(i=0; i<nvals; i++) {
         v=(int16_t)pdVals[i];
         v=abs(v);
         if(v>vmax) vmax=v;
     }
     w=DISPLAY_H_SZ/(nvals);
+    //xLogger.vAddLogMsg("W=", w); 
     tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_BLACK);
     // vmzax is always>=0 due to abs 
     for(i=0; i<nvals; i++) {

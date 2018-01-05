@@ -90,7 +90,7 @@ TimerHandle_t xIMU_TimerInit=0;
 #define NOISE_CUT_OFF   4
 
 // https://github.com/kosme/arduinoFFT
-static const uint16_t FFT_SAMPLES = 64; //This value MUST ALWAYS be a power of 2
+static const uint16_t FFT_SAMPLES = 32;//This value MUST ALWAYS be a power of 2
 // with sampling at 1000 Hz, we get width 1000/2 = 500 Hz
 // discrete of (1000/2) / (64/2) = 500/32 = 15 Hz
 //double vSamp[FFT_SAMPLES];
@@ -108,6 +108,7 @@ static void vSerialOutTask(void *pvParameters) {
 
 static void vDispOutTask(void *pvParameters) {
     //tft.drawString("Task started!",20,20,4);
+    xLogger.vAddLogMsg("Disp task started.");    
     int16_t a[6]={0,0,0,0,0,0};
     int16_t i;
     //int16_t iOverTimeCount1=0;
@@ -386,10 +387,13 @@ void  FFT_StartSampling() {
 }
 
 void  FFT_Do(boolean doLogTiming) {    
+    //xLogger.vAddLogMsg("DO");  
     uint32_t xRunTime=xTaskGetTickCount();
     //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
-    FFT_DeBias(vReal, FFT_SAMPLES);
+    //FFT_DeBias(vReal, FFT_SAMPLES);
+    //xLogger.vAddLogMsg("DO1"); 
     xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256-D_FONT_S_H*2, 128, TASK_DELAY_MPU*FFT_SAMPLES);
+    //xLogger.vAddLogMsg("DO2"); 
     if(doLogTiming)
         xLogger.vAddLogMsg("CH0", (int16_t)(xTaskGetTickCount()-xRunTime));
     xRunTime=xTaskGetTickCount();    
