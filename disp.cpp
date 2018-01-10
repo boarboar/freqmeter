@@ -141,7 +141,7 @@ void Display::ShowChart(const double *pdVals, int16_t nvals,
     tft.drawRightString(out_buf, DISPLAY_H_SZ, y0, D_FONT_S_SZ);
 }
 
-void Display::ShowChart0(const double *pdVals, int16_t nvals, 
+void Display::ShowChart0(const int16_t *pdVals, int16_t nvals, 
         int16_t y, int16_t h, int16_t xlab, int16_t noise) {
     int16_t vmax=0;
     int16_t v, y0=y+h/2, xp;

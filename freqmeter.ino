@@ -90,13 +90,16 @@ TimerHandle_t xIMU_TimerInit=0;
 #define NOISE_CUT_OFF   4
 
 // https://github.com/kosme/arduinoFFT
-static const uint16_t FFT_SAMPLES = 32;//This value MUST ALWAYS be a power of 2
+static const uint16_t FFT_SAMPLES = 64;//This value MUST ALWAYS be a power of 2
 // with sampling at 1000 Hz, we get width 1000/2 = 500 Hz
 // discrete of (1000/2) / (64/2) = 500/32 = 15 Hz
 //double vSamp[FFT_SAMPLES];
-int16_t vSamp[FFT_SAMPLES];
-double vReal[FFT_SAMPLES];
-double vImag[FFT_SAMPLES];  
+int16_t  vSamp[FFT_SAMPLES];
+int16_t  vReal[FFT_SAMPLES];
+int16_t  vImag[FFT_SAMPLES];  
+
+//double vReal[FFT_SAMPLES];
+//double vImag[FFT_SAMPLES];  
 
 static void vSerialOutTask(void *pvParameters) {
     Serial.println("Serial Out Task started.");
@@ -354,10 +357,8 @@ void TestChart(double signalFrequency) {
     double cycles = (((FFT_SAMPLES-1) * signalFrequency) / samplingFrequency); //Number of signal cycles that the sampling will read
     for (uint16_t i = 0; i < FFT_SAMPLES; i++)
     {
-        //vReal[i] = int8_t((amplitude * (sin((i * (PI*2 * cycles)) / FFT_SAMPLES))) / 2.0);/* Build data with positive and negative values*/
-        //vReal[i] = uint8_t((amplitude * (sin((i * (twoPi * cycles)) / samples) + 1.0)) / 2.0);/* Build data displaced on the Y axis to include only positive values*/
-        vReal[i] = ((amplitude * (sin((i * (PI*2 * cycles)) / FFT_SAMPLES))) / 2.0);/* Build data with positive and negative values*/
-        vImag[i] = 0.0; //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
+        vReal[i] = (int16_t)( (amplitude * (sin((i * (PI*2 * cycles)) / FFT_SAMPLES))) / 2.0);/* Build data with positive and negative values*/
+        vImag[i] = 0; //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
     }
     FFT_Do(true);
 }
@@ -390,14 +391,13 @@ void  FFT_Do(boolean doLogTiming) {
     //xLogger.vAddLogMsg("DO");  
     uint32_t xRunTime=xTaskGetTickCount();
     //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
-    //FFT_DeBias(vReal, FFT_SAMPLES);
-    //xLogger.vAddLogMsg("DO1"); 
+    FFT_DeBiasFix(vReal, FFT_SAMPLES);
     xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256-D_FONT_S_H*2, 128, TASK_DELAY_MPU*FFT_SAMPLES);
-    //xLogger.vAddLogMsg("DO2"); 
     if(doLogTiming)
         xLogger.vAddLogMsg("CH0", (int16_t)(xTaskGetTickCount()-xRunTime));
+        /*
     xRunTime=xTaskGetTickCount();    
-    FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_HANN, FFT_FORWARD);	/* Weigh data */
+    FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_HANN, FFT_FORWARD);	// Weigh data
     if(doLogTiming)
         xLogger.vAddLogMsg("WGT", (int16_t)(xTaskGetTickCount()-xRunTime));
     xRunTime=xTaskGetTickCount();
@@ -405,8 +405,8 @@ void  FFT_Do(boolean doLogTiming) {
     // xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);    
     //xLogger.vAddLogMsg("DT", (int16_t)(xTaskGetTickCount()-xRunTime));
     for (uint16_t i = 0; i < FFT_SAMPLES; i++) vImag[i] = 0.0;
-    //FFT.Compute(vReal, vImag, FFT_SAMPLES, FFT_FORWARD); /* Compute FFT */    
-    //FFT.ComplexToMagnitude(vReal, vImag, FFT_SAMPLES); /* Compute magnitudes */
+    //FFT.Compute(vReal, vImag, FFT_SAMPLES, FFT_FORWARD); // Compute FFT  
+    //FFT.ComplexToMagnitude(vReal, vImag, FFT_SAMPLES); // Compute magnitudes 
     
     FFT_ComputeMagnitude(vReal, vImag, FFT_SAMPLES); 
     if(doLogTiming)
@@ -423,8 +423,21 @@ void  FFT_Do(boolean doLogTiming) {
     xDisplay.ShowChartPlusMax(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 100, NOISE_CUT_OFF);    
     
     if(doLogTiming)
-        xLogger.vAddLogMsg("CH1", (int16_t)(xTaskGetTickCount()-xRunTime));            
+        xLogger.vAddLogMsg("CH1", (int16_t)(xTaskGetTickCount()-xRunTime));  
+        */          
 }
+
+void  FFT_DeBiasFix(int16_t *pdSamples, int8_t n) {
+    int32_t mean = 0;
+    uint16_t i, m16;
+    for(i=0; i<n; i++) {
+        mean+=pdSamples[i];
+    }
+    m16=mean/=n;
+    for(i=0; i<n; i++) {
+        pdSamples[i]-=m16;
+    }
+  }
 
 
 void  FFT_DeBias(double *pdSamples, int8_t n) {
