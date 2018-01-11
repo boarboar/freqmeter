@@ -6,6 +6,8 @@
 #include <SPI.h>
 #include "arduinoFFT.h"
 
+#include "fix_fft.h"
+
 #include "disp.h"
 #include "log.h"
 #include "mpu.h"
@@ -90,7 +92,10 @@ TimerHandle_t xIMU_TimerInit=0;
 #define NOISE_CUT_OFF   4
 
 // https://github.com/kosme/arduinoFFT
-static const uint16_t FFT_SAMPLES = 64;//This value MUST ALWAYS be a power of 2
+//static const uint16_t FFT_SAMPLES = 64;//This value MUST ALWAYS be a power of 2
+
+static const uint16_t FFT_SAMPLES = N_WAVE;//This value MUST ALWAYS be a power of 2
+
 // with sampling at 1000 Hz, we get width 1000/2 = 500 Hz
 // discrete of (1000/2) / (64/2) = 500/32 = 15 Hz
 //double vSamp[FFT_SAMPLES];
@@ -132,7 +137,10 @@ static void vDispOutTask(void *pvParameters) {
                 //bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
                 bSampReady=fSAMPReady;
                 if(bSampReady)
-                    for(i=0; i<FFT_SAMPLES; i++) vReal[i]=vSamp[i];
+                    for(i=0; i<FFT_SAMPLES; i++) {
+                        vReal[i]=vSamp[i];
+                        vImag[i]=0;
+                    }
                 /*
                 a[0] = MpuDrv::Mpu.FFT_GetDataSampCount();
                 a[1] = MpuDrv::Mpu.FFT_GetOverTimeCount1();
@@ -391,52 +399,71 @@ void  FFT_Do(boolean doLogTiming) {
     //xLogger.vAddLogMsg("DO");  
     uint32_t xRunTime=xTaskGetTickCount();
     //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
-    FFT_DeBiasFix(vReal, FFT_SAMPLES);
+    FFT_DeBiasFix(vReal);
     xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256-D_FONT_S_H*2, 128, TASK_DELAY_MPU*FFT_SAMPLES);
     if(doLogTiming)
         xLogger.vAddLogMsg("CH0", (int16_t)(xTaskGetTickCount()-xRunTime));
         /*
     xRunTime=xTaskGetTickCount();    
+    /*
     FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_HANN, FFT_FORWARD);	// Weigh data
     if(doLogTiming)
         xLogger.vAddLogMsg("WGT", (int16_t)(xTaskGetTickCount()-xRunTime));
-    xRunTime=xTaskGetTickCount();
+      unTime=xTaskGetTickCount();
+    */
 
     // xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);    
     //xLogger.vAddLogMsg("DT", (int16_t)(xTaskGetTickCount()-xRunTime));
-    for (uint16_t i = 0; i < FFT_SAMPLES; i++) vImag[i] = 0.0;
+    for (uint16_t i = 0; i < FFT_SAMPLES; i++) vImag[i] = 0;
     //FFT.Compute(vReal, vImag, FFT_SAMPLES, FFT_FORWARD); // Compute FFT  
     //FFT.ComplexToMagnitude(vReal, vImag, FFT_SAMPLES); // Compute magnitudes 
     
-    FFT_ComputeMagnitude(vReal, vImag, FFT_SAMPLES); 
+    FFT_ComputeMagnitudeFix(vReal, vImag); 
+
+    
+    //FFT_ComputeMagnitude(vReal, vImag, FFT_SAMPLES); 
+
     if(doLogTiming)
         xLogger.vAddLogMsg("CMP", (int16_t)(xTaskGetTickCount()-xRunTime));
     xRunTime=xTaskGetTickCount();
     //xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), NOISE_CUT_OFF);    
 
+/*
     FFT_Log(vReal, (FFT_SAMPLES>>1));
     if(doLogTiming)
         xLogger.vAddLogMsg("LOG", (int16_t)(xTaskGetTickCount()-xRunTime));
+        
     xRunTime=xTaskGetTickCount();
-
-
     xDisplay.ShowChartPlusMax(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 100, NOISE_CUT_OFF);    
+    */
+
+    xDisplay.ShowChart0(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1));    
     
     if(doLogTiming)
         xLogger.vAddLogMsg("CH1", (int16_t)(xTaskGetTickCount()-xRunTime));  
-        */          
+                 
 }
 
-void  FFT_DeBiasFix(int16_t *pdSamples, int8_t n) {
+void  FFT_DeBiasFix(int16_t *pdSamples) {
     int32_t mean = 0;
     uint16_t i, m16;
-    for(i=0; i<n; i++) {
+    for(i=0; i<FFT_SAMPLES; i++) {
         mean+=pdSamples[i];
     }
-    m16=mean/=n;
-    for(i=0; i<n; i++) {
+    m16=mean/=FFT_SAMPLES;
+    for(i=0; i<FFT_SAMPLES; i++) {
         pdSamples[i]-=m16;
     }
+  }
+
+  void  FFT_ComputeMagnitudeFix(int16_t *vReal, int16_t *vImag) {
+    uint16_t i, n2=FFT_SAMPLES>>1;
+    fix_fft(vReal, vImag, LOG2_N_WAVE, 0);  
+    fix_fft_cp2m(vReal, vImag, n2);
+    vReal[0]/=FFT_SAMPLES; // DC
+    for(i=1; i<n2; i++) {
+        vReal[i]/=n2;
+    }    
   }
 
 
