@@ -122,11 +122,11 @@ static void vDispOutTask(void *pvParameters) {
     //int16_t iOverTimeCount1=0;
     
     TestChart(20); // 20Hz
-    vTaskDelay(2000);
+    vTaskDelay(5000);
     TestChart(50); // 50Hz
-    vTaskDelay(2000);
+    vTaskDelay(5000);
     TestChart(100); // 100Hz
-    vTaskDelay(2000);
+    vTaskDelay(5000);
     TestChart(250); // 250Hz
     
     boolean bSampReady=false;
@@ -403,7 +403,7 @@ void  FFT_Do(boolean doLogTiming) {
     xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256-D_FONT_S_H*2, 128, TASK_DELAY_MPU*FFT_SAMPLES);
     if(doLogTiming)
         xLogger.vAddLogMsg("CH0", (int16_t)(xTaskGetTickCount()-xRunTime));
-        /*
+
     xRunTime=xTaskGetTickCount();    
     /*
     FFT.Windowing(vReal, FFT_SAMPLES, FFT_WIN_TYP_HANN, FFT_FORWARD);	// Weigh data
@@ -460,10 +460,14 @@ void  FFT_DeBiasFix(int16_t *pdSamples) {
     uint16_t i, n2=FFT_SAMPLES>>1;
     fix_fft(vReal, vImag, LOG2_N_WAVE, 0);  
     fix_fft_cp2m(vReal, vImag, n2);
-    vReal[0]/=FFT_SAMPLES; // DC
-    for(i=1; i<n2; i++) {
+    /*
+    
+    for(i=0; i<n2; i++) {
         vReal[i]/=n2;
-    }    
+    } 
+    vReal[0]/=2; //DC
+    */
+
   }
 
 

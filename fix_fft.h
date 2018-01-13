@@ -21,9 +21,11 @@
 //#define N_WAVE      1024    /* full length of Sinewave[] */
 //#define LOG2_N_WAVE 10      /* log2(N_WAVE) */
 
-#define N_WAVE      32    /* full length of Sinewave[] */
-#define LOG2_N_WAVE 5      /* log2(N_WAVE) */
+//#define N_WAVE      32    /* full length of Sinewave[] */
+//#define LOG2_N_WAVE 5      /* log2(N_WAVE) */
 
+#define N_WAVE      64    /* full length of Sinewave[] */
+#define LOG2_N_WAVE 6      /* log2(N_WAVE) */
 
 /*
  fix_fft() - perform forward/inverse fast Fourier transform.
