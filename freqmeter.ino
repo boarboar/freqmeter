@@ -365,8 +365,7 @@ void TestChart(double signalFrequency) {
     double cycles = (((FFT_SAMPLES-1) * signalFrequency) / samplingFrequency); //Number of signal cycles that the sampling will read
     for (uint16_t i = 0; i < FFT_SAMPLES; i++)
     {
-        vReal[i] = (int16_t)( (amplitude * (sin((i * (PI*2 * cycles)) / FFT_SAMPLES))) / 2.0);/* Build data with positive and negative values*/
-        vImag[i] = 0; //Imaginary part must be zeroed in case of looping to avoid wrong calculations and overflows
+        vReal[i] = (int16_t)( (amplitude * (sin((i * (PI*2 * cycles)) / FFT_SAMPLES))) / 2.0);/* Build data with positive and negative values*/        
     }
     FFT_Do(true);
 }
@@ -413,8 +412,6 @@ void  FFT_Do(boolean doLogTiming) {
     */
 
     for (uint16_t i = 0; i < FFT_SAMPLES; i++) vImag[i] = 0;
-
-    
     FFT_ComputeMagnitudeFix(vReal, vImag); 
 
     //FFT_ComputeMagnitude(vReal, vImag, FFT_SAMPLES); 

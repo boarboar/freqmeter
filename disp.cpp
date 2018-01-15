@@ -155,20 +155,25 @@ void Display::ShowChart0(const int16_t *pdVals, int16_t nvals,
         if(v>vmax) vmax=v;
     }
     w=DISPLAY_H_SZ/(nvals);
-    //xLogger.vAddLogMsg("W=", w); 
+    if(w<=1) {
+        xLogger.vAddLogMsg("W1=", w); 
+        return;
+        }
     tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_BLACK);
     // vmzax is always>=0 due to abs 
+    xp=0;
     for(i=0; i<nvals; i++) {
         v=(int16_t)pdVals[i];  
         if(abs(v)<noise) continue;
         v=(int16_t)( ((int32_t)v)*h / ((int32_t)vmax+vmax+1) );
-        xp=i*(w);
+        //xp=i*(w);
         if(v>=0) {
             tft.fillRect(xp, y0-v, w-1, v, ILI9341_RED);
         }
         else  {
             tft.fillRect(xp, y0, w-1, -v, ILI9341_GREEN);
         }
+        xp+=w;
     }
     tft.drawFastHLine(0, y0, DISPLAY_H_SZ-1, ILI9341_BLUE);
     tft.setTextColor(ILI9341_YELLOW); // transparent
@@ -217,13 +222,19 @@ void Display::ShowChartPlusMax(const int16_t *pdVals, int16_t nvals,
     uint16_t v, y0=y+h, xp;
     uint8_t w, i;
     w=DISPLAY_H_SZ/(nvals);
+    if(w<=1) {
+        xLogger.vAddLogMsg("W2=", w); 
+        return;
+        }
+
     tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_BLACK);
     if(vmax<=0) return;
-    for(i=0; i<nvals; i++) {
+
+    for(i=0, xp=0; i<nvals, xp+=w; i++) {
         v=(uint16_t)pdVals[i];      
         if(v<noise) continue;   
         v=(uint16_t)( ((uint32_t)v)*h / ((int32_t)vmax) );
-        xp=i*(w);
+        //xp=i*(w);
         tft.fillRect(xp, y0-v, w-1, v, ILI9341_RED);
     }
     tft.setTextColor(ILI9341_YELLOW); // transparent
