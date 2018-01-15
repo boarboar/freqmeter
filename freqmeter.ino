@@ -89,7 +89,7 @@ TimerHandle_t xIMU_TimerInit=0;
 
 // FFT
 
-#define NOISE_CUT_OFF   4
+#define NOISE_CUT_OFF   2
 
 // https://github.com/kosme/arduinoFFT
 //static const uint16_t FFT_SAMPLES = 64;//This value MUST ALWAYS be a power of 2
@@ -395,10 +395,10 @@ void  FFT_StartSampling() {
      }      
 }
 
+
 void  FFT_Do(boolean doLogTiming) {    
     //xLogger.vAddLogMsg("DO");  
     uint32_t xRunTime=xTaskGetTickCount();
-    //xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-256, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);
     FFT_DeBiasFix(vReal);
     xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256-D_FONT_S_H*2, 128, TASK_DELAY_MPU*FFT_SAMPLES);
     if(doLogTiming)
@@ -412,21 +412,16 @@ void  FFT_Do(boolean doLogTiming) {
       unTime=xTaskGetTickCount();
     */
 
-    // xDisplay.ShowChart(vReal, FFT_SAMPLES, 320-128, 128, 64, TASK_DELAY_MPU*FFT_SAMPLES);    
-    //xLogger.vAddLogMsg("DT", (int16_t)(xTaskGetTickCount()-xRunTime));
     for (uint16_t i = 0; i < FFT_SAMPLES; i++) vImag[i] = 0;
-    //FFT.Compute(vReal, vImag, FFT_SAMPLES, FFT_FORWARD); // Compute FFT  
-    //FFT.ComplexToMagnitude(vReal, vImag, FFT_SAMPLES); // Compute magnitudes 
+
     
     FFT_ComputeMagnitudeFix(vReal, vImag); 
 
-    
     //FFT_ComputeMagnitude(vReal, vImag, FFT_SAMPLES); 
 
     if(doLogTiming)
         xLogger.vAddLogMsg("CMP", (int16_t)(xTaskGetTickCount()-xRunTime));
     xRunTime=xTaskGetTickCount();
-    //xDisplay.ShowChartPlus(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), NOISE_CUT_OFF);    
 
 /*
     FFT_Log(vReal, (FFT_SAMPLES>>1));
@@ -437,7 +432,11 @@ void  FFT_Do(boolean doLogTiming) {
     xDisplay.ShowChartPlusMax(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 100, NOISE_CUT_OFF);    
     */
 
-    xDisplay.ShowChart0(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1));    
+    FFT_LogFix(vReal, (FFT_SAMPLES>>1));
+
+    //xDisplay.ShowChart0(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1));    
+
+    xDisplay.ShowChartPlusMax(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 100, NOISE_CUT_OFF);    
     
     if(doLogTiming)
         xLogger.vAddLogMsg("CH1", (int16_t)(xTaskGetTickCount()-xRunTime));  
@@ -468,6 +467,23 @@ void  FFT_DeBiasFix(int16_t *pdSamples) {
     vReal[0]/=2; //DC
     */
 
+  }
+
+
+void  FFT_LogFix(int16_t *pdSamples, int8_t n) {
+    uint16_t i, value, result;
+    for(i=0; i<n; i++) {
+        value = pdSamples[i];
+        if(value>1) {
+            // log2
+            result = 0;
+	        while (((value >> result) & 1) != 1) result++;
+            // * 20 * log10(2) = 20 * 3/10
+            pdSamples[i]=6*result;
+        }
+        else     
+            pdSamples[i]=0;
+    }
   }
 
 
