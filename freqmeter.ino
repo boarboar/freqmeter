@@ -416,9 +416,6 @@ void  FFT_Do(boolean doLogTiming) {
 
     //FFT_ComputeMagnitude(vReal, vImag, FFT_SAMPLES); 
 
-    if(doLogTiming)
-        xLogger.vAddLogMsg("CMP", (int16_t)(xTaskGetTickCount()-xRunTime));
-    xRunTime=xTaskGetTickCount();
 
 /*
     FFT_Log(vReal, (FFT_SAMPLES>>1));
@@ -430,6 +427,10 @@ void  FFT_Do(boolean doLogTiming) {
     */
 
     FFT_LogFix(vReal, (FFT_SAMPLES>>1));
+
+    if(doLogTiming)
+        xLogger.vAddLogMsg("CMP", (int16_t)(xTaskGetTickCount()-xRunTime));
+    xRunTime=xTaskGetTickCount();
 
     //xDisplay.ShowChart0(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1));    
 
@@ -472,11 +473,14 @@ void  FFT_LogFix(int16_t *pdSamples, int8_t n) {
     for(i=0; i<n; i++) {
         value = pdSamples[i];
         if(value>1) {
+            /*
             // log2
             result = 0;
 	        while (((value >> result) & 1) != 1) result++;
-            // * 20 * log10(2) = 20 * 3/10
             pdSamples[i]=6*result;
+            // * 20 * log10(2) = 20 * 3/10
+            */
+            pdSamples[i]=20.0*log10(pdSamples[i]);
         }
         else     
             pdSamples[i]=0;

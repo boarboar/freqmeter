@@ -219,7 +219,7 @@ void Display::ShowChartPlus(const double *pdVals, int16_t nvals,
 
 void Display::ShowChartPlusMax(const int16_t *pdVals, int16_t nvals, 
         int16_t y, int16_t h, int16_t xlab, int16_t vmax, int16_t noise) {
-    uint16_t v, y0=y+h, xp;
+    int16_t v, y0=y+h, xp;
     uint8_t w, i;
     w=DISPLAY_H_SZ/(nvals);
     if(w<=1) {
@@ -229,12 +229,13 @@ void Display::ShowChartPlusMax(const int16_t *pdVals, int16_t nvals,
 
     tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_BLACK);
     if(vmax<=0) return;
-
-    for(i=0, xp=0; i<nvals, xp+=w; i++) {
-        v=(uint16_t)pdVals[i];      
+    xp=0;
+    for(i=0; i<nvals; i++) {
+        v=(int16_t)pdVals[i];      
         if(v<noise) continue;   
-        v=(uint16_t)( ((uint32_t)v)*h / ((int32_t)vmax) );
+        v=(int16_t)( ((uint32_t)v)*h / ((int32_t)vmax) );
         //xp=i*(w);
+        xp+=w;
         tft.fillRect(xp, y0-v, w-1, v, ILI9341_RED);
     }
     tft.setTextColor(ILI9341_YELLOW); // transparent
