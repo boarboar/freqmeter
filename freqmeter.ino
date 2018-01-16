@@ -139,7 +139,7 @@ static void vDispOutTask(void *pvParameters) {
                 if(bSampReady)
                     for(i=0; i<FFT_SAMPLES; i++) {
                         vReal[i]=vSamp[i];
-                        vImag[i]=0;
+                        //vImag[i]=0;
                     }
                 /*
                 a[0] = MpuDrv::Mpu.FFT_GetDataSampCount();
@@ -398,7 +398,9 @@ void  FFT_StartSampling() {
 void  FFT_Do(boolean doLogTiming) {    
     //xLogger.vAddLogMsg("DO");  
     uint32_t xRunTime=xTaskGetTickCount();
-    FFT_DeBiasFix(vReal);
+    
+    fix_fft_debias(vReal, FFT_SAMPLES);
+
     xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256-D_FONT_S_H*2, 128, TASK_DELAY_MPU*FFT_SAMPLES);
     if(doLogTiming)
         xLogger.vAddLogMsg("CH0", (int16_t)(xTaskGetTickCount()-xRunTime));
@@ -426,8 +428,6 @@ void  FFT_Do(boolean doLogTiming) {
     xDisplay.ShowChartPlusMax(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 100, NOISE_CUT_OFF);    
     */
 
-    FFT_LogFix(vReal, (FFT_SAMPLES>>1));
-
     if(doLogTiming)
         xLogger.vAddLogMsg("CMP", (int16_t)(xTaskGetTickCount()-xRunTime));
     xRunTime=xTaskGetTickCount();
@@ -441,20 +441,12 @@ void  FFT_Do(boolean doLogTiming) {
                  
 }
 
-void  FFT_DeBiasFix(int16_t *pdSamples) {
-    int32_t mean = 0;
-    uint16_t i, m16;
-    for(i=0; i<FFT_SAMPLES; i++) {
-        mean+=pdSamples[i];
-    }
-    m16=mean/=FFT_SAMPLES;
-    for(i=0; i<FFT_SAMPLES; i++) {
-        pdSamples[i]-=m16;
-    }
-  }
 
-  void  FFT_ComputeMagnitudeFix(int16_t *vReal, int16_t *vImag) {
-    uint16_t i, n2=FFT_SAMPLES>>1;
+void  FFT_ComputeMagnitudeFix(int16_t *vReal, int16_t *vImag) {
+    uint16_t n2=FFT_SAMPLES>>1;
+    
+    fix_fft_wnd(vReal, FFT_SAMPLES);
+
     fix_fft(vReal, vImag, LOG2_N_WAVE, 0);  
     fix_fft_cp2m(vReal, vImag, n2);
     /*
@@ -465,26 +457,8 @@ void  FFT_DeBiasFix(int16_t *pdSamples) {
     vReal[0]/=2; //DC
     */
 
-  }
+    fix_fft_log(vReal, n2);
 
-
-void  FFT_LogFix(int16_t *pdSamples, int8_t n) {
-    uint16_t i, value, result;
-    for(i=0; i<n; i++) {
-        value = pdSamples[i];
-        if(value>1) {
-            /*
-            // log2
-            result = 0;
-	        while (((value >> result) & 1) != 1) result++;
-            pdSamples[i]=6*result;
-            // * 20 * log10(2) = 20 * 3/10
-            */
-            pdSamples[i]=20.0*log10(pdSamples[i]);
-        }
-        else     
-            pdSamples[i]=0;
-    }
   }
 
 

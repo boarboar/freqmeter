@@ -40,7 +40,7 @@
   Since we only use 3/4 of N_WAVE, we define only
   this many samples, in order to conserve data space.
 */
-int16_t Sinewave[N_WAVE-N_WAVE/4] = 
+const int16_t Sinewave[N_WAVE-N_WAVE/4] = 
 #if (N_WAVE == 8)
 {0,23170,32767,23170,0,-23170};
 
@@ -383,4 +383,80 @@ void fix_fft_cp2m(int16_t *vReal, int16_t *vImag, uint16_t samples)
 		vReal[i] = isqrt32( (int32_t)vReal[i]*vReal[i] + (int32_t)vImag[i]*vImag[i] );
 	}
 }
-    
+
+
+void  fix_fft_debias(int16_t *pdSamples, int8_t n) {
+    int32_t mean = 0;
+    uint16_t i, m16;
+    for(i=0; i<n; i++) {
+        mean+=pdSamples[i];
+    }
+    m16=mean/n;
+    for(i=0; i<n; i++) {
+        pdSamples[i]-=m16;
+    }
+  }
+
+void  fix_fft_log(int16_t *pdSamples, int8_t n) {
+    int16_t i, value, result;
+    for(i=0; i<n; i++) {
+        value = pdSamples[i];
+        if(value>1) {
+            /*
+            // log2
+            result = 0;
+	        while (((value >> result) & 1) != 1) result++;
+            pdSamples[i]=6*result;
+            // * 20 * log10(2) = 20 * 3/10
+            */
+            pdSamples[i]=20.0*log10(value);
+        }
+        else     
+            pdSamples[i]=0;
+    }
+  }
+   
+
+void fix_fft_wnd(int16_t *vData, uint16_t samples, uint8_t windowType, uint8_t dir)
+{
+/* Weighing factors are computed once before multiple use of FFT */
+/* The weighing function is symetric; half the weighs are recorded */
+	double samplesMinusOne = (double(samples) - 1.0);
+	for (uint16_t i = 0; i < (samples >> 1); i++) {
+		double indexMinusOne = double(i);
+		double ratio = (indexMinusOne / samplesMinusOne);
+		double weighingFactor = 1.0;
+		/* Compute and record weighting factor */
+		switch (windowType) {
+		case FFT_WIN_TYP_RECTANGLE: /* rectangle (box car) */
+			weighingFactor = 1.0;
+			break;
+		case FFT_WIN_TYP_HAMMING: /* hamming */
+			weighingFactor = 0.54 - (0.46 * cos(twoPi * ratio));
+			break;
+		case FFT_WIN_TYP_HANN: /* hann */
+			weighingFactor = 0.54 * (1.0 - cos(twoPi * ratio));
+			break;
+		case FFT_WIN_TYP_TRIANGLE: /* triangle (Bartlett) */
+			weighingFactor = 1.0 - ((2.0 * abs(indexMinusOne - (samplesMinusOne / 2.0))) / samplesMinusOne);
+			break;
+		case FFT_WIN_TYP_BLACKMAN: /* blackmann */
+			weighingFactor = 0.42323 - (0.49755 * (cos(twoPi * ratio))) + (0.07922 * (cos(fourPi * ratio)));
+			break;
+		case FFT_WIN_TYP_FLT_TOP: /* flat top */
+			weighingFactor = 0.2810639 - (0.5208972 * cos(twoPi * ratio)) + (0.1980399 * cos(fourPi * ratio));
+			break;
+		case FFT_WIN_TYP_WELCH: /* welch */
+			weighingFactor = 1.0 - sq((indexMinusOne - samplesMinusOne / 2.0) / (samplesMinusOne / 2.0));
+			break;
+		}
+		if (dir == FFT_FORWARD) {
+			vData[i] *= weighingFactor;
+			vData[samples - (i + 1)] *= weighingFactor;
+		}
+		else {
+			vData[i] /= weighingFactor;
+			vData[samples - (i + 1)] /= weighingFactor;
+		}
+	}
+}

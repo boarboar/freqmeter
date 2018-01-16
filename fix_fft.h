@@ -27,6 +27,21 @@
 #define N_WAVE      64    /* full length of Sinewave[] */
 #define LOG2_N_WAVE 6      /* log2(N_WAVE) */
 
+/* Custom constants */
+#define FFT_FORWARD 0x01
+#define FFT_REVERSE 0x00
+/* Windowing type */
+#define FFT_WIN_TYP_RECTANGLE 0x00 /* rectangle (Box car) */
+#define FFT_WIN_TYP_HAMMING 0x01 /* hamming */
+#define FFT_WIN_TYP_HANN 0x02 /* hann */
+#define FFT_WIN_TYP_TRIANGLE 0x03 /* triangle (Bartlett) */
+#define FFT_WIN_TYP_BLACKMAN 0x04 /* blackmann */
+#define FFT_WIN_TYP_FLT_TOP 0x05 /* flat top */
+#define FFT_WIN_TYP_WELCH 0x06 /* welch */
+/*Mathematial constants*/
+#define twoPi 6.28318531
+#define fourPi 12.56637061
+
 /*
  fix_fft() - perform forward/inverse fast Fourier transform.
  fr[n],fi[n] are real and imaginary arrays, both INPUT AND
@@ -35,6 +50,9 @@
 */
 int16_t fix_fft(int16_t fr[], int16_t fi[], int16_t m, int16_t inverse);
 void fix_fft_cp2m(int16_t *vReal, int16_t *vImag, uint16_t samples);
+void  fix_fft_debias(int16_t *pdSamples, int8_t n);
+void fix_fft_log(int16_t *pdSamples, int8_t n);
+void fix_fft_wnd(int16_t *vData, uint16_t samples, uint8_t windowType=FFT_WIN_TYP_HANN, uint8_t dir=FFT_FORWARD);
 
 
 
