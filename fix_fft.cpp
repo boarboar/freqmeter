@@ -451,8 +451,8 @@ void fix_fft_wnd(int16_t *vData, uint16_t samples, uint8_t windowType, uint8_t d
 			break;
 		}
 		if (dir == FFT_FORWARD) {
-			vData[i] *= weighingFactor;
-			vData[samples - (i + 1)] *= weighingFactor;
+			vData[i] = weighingFactor*vData[i];
+			vData[samples - (i + 1)] = weighingFactor*vData[samples - (i + 1)];
 		}
 		else {
 			vData[i] /= weighingFactor;

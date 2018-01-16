@@ -445,7 +445,7 @@ void  FFT_Do(boolean doLogTiming) {
 void  FFT_ComputeMagnitudeFix(int16_t *vReal, int16_t *vImag) {
     uint16_t n2=FFT_SAMPLES>>1;
     
-    fix_fft_wnd(vReal, FFT_SAMPLES);
+    //fix_fft_wnd(vReal, FFT_SAMPLES);
 
     fix_fft(vReal, vImag, LOG2_N_WAVE, 0);  
     fix_fft_cp2m(vReal, vImag, n2);
