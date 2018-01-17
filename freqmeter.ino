@@ -137,10 +137,8 @@ static void vDispOutTask(void *pvParameters) {
                 //bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
                 bSampReady=fSAMPReady;
                 if(bSampReady)
-                    for(i=0; i<FFT_SAMPLES; i++) {
-                        vReal[i]=vSamp[i];
-                        //vImag[i]=0;
-                    }
+                    for(i=0; i<FFT_SAMPLES; i++) vReal[i]=vSamp[i];
+                        
                 /*
                 a[0] = MpuDrv::Mpu.FFT_GetDataSampCount();
                 a[1] = MpuDrv::Mpu.FFT_GetOverTimeCount1();
@@ -158,7 +156,7 @@ static void vDispOutTask(void *pvParameters) {
             if(bSampReady) {             
                 //xLogger.vAddLogMsg("DSP SMP  Ready!");
                 xDisplay.ShowData(a, 3);
-                FFT_Do(false);
+                FFT_Do(vReal, vImag, false);
                 FFT_StartSampling();                
             }
         }
@@ -367,7 +365,7 @@ void TestChart(double signalFrequency) {
     {
         vReal[i] = (int16_t)( (amplitude * (sin((i * (PI*2 * cycles)) / FFT_SAMPLES))) / 2.0);/* Build data with positive and negative values*/        
     }
-    FFT_Do(true);
+    FFT_Do(vReal, vImag, true);
 }
 
 void  FFT_StartSampling() {    
@@ -395,11 +393,13 @@ void  FFT_StartSampling() {
 }
 
 
-void  FFT_Do(boolean doLogTiming) {    
+void  FFT_Do(int16_t *vReal, int16_t *vImag, boolean doLogTiming) {    
     //xLogger.vAddLogMsg("DO");  
     uint32_t xRunTime=xTaskGetTickCount();
     
     fix_fft_debias(vReal, FFT_SAMPLES);
+
+    fix_fft_wnd(vReal, FFT_SAMPLES); //!!! just for test
 
     xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256-D_FONT_S_H*2, 128, TASK_DELAY_MPU*FFT_SAMPLES);
     if(doLogTiming)
@@ -449,14 +449,7 @@ void  FFT_ComputeMagnitudeFix(int16_t *vReal, int16_t *vImag) {
 
     fix_fft(vReal, vImag, LOG2_N_WAVE, 0);  
     fix_fft_cp2m(vReal, vImag, n2);
-    /*
-    
-    for(i=0; i<n2; i++) {
-        vReal[i]/=n2;
-    } 
     vReal[0]/=2; //DC
-    */
-
     fix_fft_log(vReal, n2);
 
   }
