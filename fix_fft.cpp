@@ -404,12 +404,14 @@ void  fix_fft_log(int16_t *pdSamples, int8_t n) {
         if(value>1) {
             
             // log2
+            /*
             result = 0;
 	        while (((value >> result) & 1) != 1) result++;
             pdSamples[i]=6*result;
+            */
             // * 20 * log10(2) = 20 * 3/10
             
-            //pdSamples[i]=20.0*log10(value);
+            pdSamples[i]=20.0*log10(value);
         }
         else     
             pdSamples[i]=0;

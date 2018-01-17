@@ -391,7 +391,7 @@ void  MpuDrv::FFT_DoSampling(uint16_t dt, bool data) {
 }
 
 //void  MpuDrv::FFT_SetSampling(double *dSamples, int8_t n) {
-void  MpuDrv::FFT_SetSampling(int16_t *dSamples, int8_t n) {
+void  MpuDrv::FFT_SetSampling(int16_t *dSamples, int16_t n) {
   nSample = n;
   pdSample = dSamples;
 }

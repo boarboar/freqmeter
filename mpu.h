@@ -50,7 +50,7 @@ public:
   void  getAccel(int16_t a[3]);
 
   //void FFT_SetSampling(double *dSamples, int8_t n);
-  void FFT_SetSampling(int16_t *pdSamples, int8_t n);
+  void FFT_SetSampling(int16_t *pdSamples, int16_t n);
   void FFT_DoSampling(uint16_t dt, bool data);
   void FFT_StartSampling(); 
   boolean FFT_SamplingReady();
@@ -93,7 +93,7 @@ protected:
   //double vReal[FFT_SAMPLES];
   //double vImag[FFT_SAMPLES];
 
-  int8_t nSample, iSample;
+  int16_t nSample, iSample;
   int16_t iOverTimeCount1;
   int16_t iDataMissCount;
   int16_t iFIFOOvflCount;

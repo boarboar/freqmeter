@@ -99,7 +99,7 @@ static const uint16_t FFT_SAMPLES = N_WAVE;//This value MUST ALWAYS be a power o
 // with sampling at 1000 Hz, we get width 1000/2 = 500 Hz
 // discrete of (1000/2) / (64/2) = 500/32 = 15 Hz
 //double vSamp[FFT_SAMPLES];
-int16_t  vSamp[FFT_SAMPLES];
+//int16_t  vSamp[FFT_SAMPLES];
 int16_t  vReal[FFT_SAMPLES];
 int16_t  vImag[FFT_SAMPLES];  
 
@@ -136,9 +136,11 @@ static void vDispOutTask(void *pvParameters) {
             if(MpuDrv::Mpu.Acquire()) {
                 //bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
                 bSampReady=fSAMPReady;
+                /*
                 if(bSampReady)
                     for(i=0; i<FFT_SAMPLES; i++) vReal[i]=vSamp[i];
-                        
+                 */
+
                 /*
                 a[0] = MpuDrv::Mpu.FFT_GetDataSampCount();
                 a[1] = MpuDrv::Mpu.FFT_GetOverTimeCount1();
@@ -281,7 +283,8 @@ void setup() {
     //Wire.begin(SCL_PIN, SDA_PIN);
     Wire.begin();
     MpuDrv::Mpu.init();
-    MpuDrv::Mpu.FFT_SetSampling(vSamp, FFT_SAMPLES);
+    //MpuDrv::Mpu.FFT_SetSampling(vSamp, FFT_SAMPLES);
+    MpuDrv::Mpu.FFT_SetSampling(vReal, FFT_SAMPLES);
 
     Serial.println("Starting...");
     digitalWrite(BOARD_LED_PIN, HIGH);
