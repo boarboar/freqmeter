@@ -145,7 +145,7 @@ void Display::ShowChart0(const int16_t *pdVals, int16_t nvals,
         int16_t y, int16_t h, int16_t xlab, int16_t noise) {
     int16_t vmax=0;
     int16_t v, y0=y+h/2, xp;
-    int8_t w, i;
+    int16_t w, i;
     //xLogger.vAddLogMsg("N=", nvals); 
     if(!pdVals || nvals<=0 || h<=0) return;
     //xLogger.vAddLogMsg("DO3"); 
@@ -220,7 +220,7 @@ void Display::ShowChartPlus(const double *pdVals, int16_t nvals,
 void Display::ShowChartPlusMax(const int16_t *pdVals, int16_t nvals, 
         int16_t y, int16_t h, int16_t xlab, int16_t vmax, int16_t noise) {
     int16_t v, y0=y+h, xp;
-    uint8_t w, i;
+    uint16_t w, i;
     w=DISPLAY_H_SZ/(nvals);
     if(w<=1) {
         xLogger.vAddLogMsg("W2=", w); 
