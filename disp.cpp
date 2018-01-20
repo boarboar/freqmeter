@@ -145,7 +145,8 @@ void Display::ShowChart0(const int16_t *pdVals, int16_t nvals,
         int16_t y, int16_t h, int16_t xlab, int16_t noise) {
     int16_t vmax=0;
     int16_t v, y0=y+h/2, xp;
-    int16_t w, i;
+    int16_t i;
+    int8_t w, wc;
     //xLogger.vAddLogMsg("N=", nvals); 
     if(!pdVals || nvals<=0 || h<=0) return;
     //xLogger.vAddLogMsg("DO3"); 
@@ -155,10 +156,13 @@ void Display::ShowChart0(const int16_t *pdVals, int16_t nvals,
         if(v>vmax) vmax=v;
     }
     w=DISPLAY_H_SZ/(nvals);
+    /*
     if(w<=1) {
         xLogger.vAddLogMsg("W1=", w); 
         return;
         }
+        */
+    wc=w<=1 ? 1 : w-1;    
     tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_BLACK);
     // vmzax is always>=0 due to abs 
     xp=0;
@@ -168,10 +172,10 @@ void Display::ShowChart0(const int16_t *pdVals, int16_t nvals,
         v=(int16_t)( ((int32_t)v)*h / ((int32_t)vmax+vmax+1) );
         //xp=i*(w);
         if(v>=0) {
-            tft.fillRect(xp, y0-v, w-1, v, ILI9341_RED);
+            tft.fillRect(xp, y0-v, wc, v, ILI9341_RED);
         }
         else  {
-            tft.fillRect(xp, y0, w-1, -v, ILI9341_GREEN);
+            tft.fillRect(xp, y0, wc, -v, ILI9341_GREEN);
         }
         xp+=w;
     }
