@@ -162,11 +162,12 @@ void Display::ShowChart0(const int16_t *pdVals, int16_t nvals,
         return;
         }
         */
+    if(nvals*w*6<DISPLAY_H_SZ*5) w++; // if eff width<5/6   
     wc=w<=1 ? 1 : w-1;    
     tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_BLACK);
     // vmzax is always>=0 due to abs 
     xp=0;
-    for(i=0; i<nvals; i++) {
+    for(i=0; i<nvals && xp+wc<DISPLAY_H_SZ; i++) {
         v=(int16_t)pdVals[i];  
         if(abs(v)<noise) continue;
         v=(int16_t)( ((int32_t)v)*h / ((int32_t)vmax+vmax+1) );

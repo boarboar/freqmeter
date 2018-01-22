@@ -398,20 +398,18 @@ void  fix_fft_debias(int16_t *pdSamples, int8_t n) {
   }
 
 void  fix_fft_log(int16_t *pdSamples, int8_t n) {
-    int16_t i, value, result;
+    int16_t  value;
+    uint16_t  result, i;
     for(i=0; i<n; i++) {
         value = pdSamples[i];
-        if(value>1) {
-            
+        if(value>1) {            
             // log2
-            /*
-            result = 0;
-	        while (((value >> result) & 1) != 1) result++;
-            pdSamples[i]=6*result;
-            */
             // * 20 * log10(2) = 20 * 3/10
-            
-            pdSamples[i]=20.0*log10(value);
+            uint16_t uv=value;
+            result=0;
+            while( uv>>=1 ) result++;
+            pdSamples[i]=result*6;
+            //pdSamples[i]=20.0*log10(value);
         }
         else     
             pdSamples[i]=0;
