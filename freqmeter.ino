@@ -48,8 +48,7 @@ Adafruit_GFX_AS : Load_fonts.h to be fixed:
  * PA9  PWM FT
  * PA10 PWM FT
  * PA11 PWM FT
- * PA12     FT
- * PA15 PWM FT
+ * PA12     FT * PA15 PWM FT
  * PB3  PWM FT
  * PB4  PWM FT
  * PB5  PWM
@@ -402,7 +401,7 @@ void  FFT_Do(int16_t *vReal, int16_t *vImag, boolean doLogTiming) {
     
     fix_fft_debias(vReal, FFT_SAMPLES);
 
-    fix_fft_wnd(vReal, FFT_SAMPLES); //!!! just for test
+    //fix_fft_wnd(vReal, FFT_SAMPLES); //!!! just for test
 
     xDisplay.ShowChart0(vReal, FFT_SAMPLES, 320-256-D_FONT_S_H*2, 128, TASK_DELAY_MPU*FFT_SAMPLES);
     if(doLogTiming)

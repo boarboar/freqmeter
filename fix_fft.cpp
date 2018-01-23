@@ -387,7 +387,8 @@ void fix_fft_cp2m(int16_t *vReal, int16_t *vImag, uint16_t samples)
 
 void  fix_fft_debias(int16_t *pdSamples, int8_t n) {
     int32_t mean = 0;
-    uint16_t i, m16;
+    uint16_t i;
+    int16_t m16;
     for(i=0; i<n; i++) {
         mean+=pdSamples[i];
     }
