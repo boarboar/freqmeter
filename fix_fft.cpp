@@ -398,6 +398,9 @@ void  fix_fft_debias(int16_t *pdSamples, int8_t n) {
     }
   }
 
+//7 : X:2,5,7,12
+//8 : L:12,18,18,24
+
 void  fix_fft_log(int16_t *pdSamples, int8_t n) {
     int16_t  value;
     uint16_t  result, i;
