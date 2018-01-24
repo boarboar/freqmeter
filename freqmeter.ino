@@ -119,7 +119,13 @@ static void vDispOutTask(void *pvParameters) {
     int16_t a[6]={0,0,0,0,0,0};
     int16_t i;
     //int16_t iOverTimeCount1=0;
-    
+    {
+        // test log
+        int16_t x[4]={2, 5, 7, 12};
+        xLogger.vAddLogMsg("X", x[0], x[1], x[2], x[3]);
+        fix_fft_log(x, 4);
+        xLogger.vAddLogMsg("L", x[0], x[1], x[2], x[3]);
+    }
     TestChart(20); // 20Hz
     vTaskDelay(5000);
     TestChart(50); // 50Hz
