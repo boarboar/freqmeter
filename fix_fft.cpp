@@ -414,7 +414,7 @@ void  fix_fft_log(int16_t *pdSamples, int8_t n) {
             while( uv>>=1 ) result++;
 
             uv=1<<result;
-            if((uint32_t)uv*10>=15) result++; //round
+            if((uint32_t)(value-uv)*10>=15) result++; //round
 
             pdSamples[i]=result*6;
             //pdSamples[i]=20.0*log10(value);
