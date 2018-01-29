@@ -245,7 +245,10 @@ void Display::ShowChartPlusMax(const int16_t *pdVals, int16_t nvals,
         v=(int16_t)( ((uint32_t)v)*h / ((int32_t)vmax) );
         //xp=i*(w);
         xp+=w;
-        tft.fillRect(xp, y0-v, wc, v, ILI9341_RED);
+        if(v<h)
+            tft.fillRect(xp, y0-v, wc, v, ILI9341_GREEN);
+        else    
+            tft.fillRect(xp, y0-v, wc, h, ILI9341_RED);
     }
     tft.setTextColor(ILI9341_YELLOW); // transparent
     //tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
