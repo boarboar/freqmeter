@@ -407,7 +407,8 @@ void  fix_fft_log(int16_t *pdSamples, int8_t n) {
     for(i=0; i<n; i++) {
         value = pdSamples[i];
         if(value>1) {            
-            //pdSamples[i]=20.0*log10(value);
+            pdSamples[i]=20.0*log10(value);
+            /*
             // log2
             // * 20 * log10(2) = 20 * 3/10 = 6
             uint16_t uv=value;
@@ -418,7 +419,9 @@ void  fix_fft_log(int16_t *pdSamples, int8_t n) {
             //if((uint32_t)(value-uv)*10>=15) result++; //round
             uv=(uint32_t)value*10/uv;
             uv = uv<11 ? 0 : uv<13 ? 1 : uv<14 ? 2 : uv<16 ? 3 : uv<18 ? 4 : 5;
-            pdSamples[i]=result*6+uv;            
+            //pdSamples[i]=result*6+uv; 
+            pdSamples[i]=result*6;     
+            */      
         }
         else     
             pdSamples[i]=0;
