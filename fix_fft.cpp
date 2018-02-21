@@ -398,6 +398,13 @@ void  fix_fft_debias(int16_t *pdSamples, int8_t n) {
     }
   }
 
+void fix_fft_denoise(int16_t *pdSamples, int8_t n, int16_t th) {
+    uint16_t i;
+    for(i=0; i<n; i++) {
+        if(pdSamples[i]<th) pdSamples[i]=0;
+    }
+}
+
 //7 : X:2,5,7,12
 //8 : L:12,18,18,24
 

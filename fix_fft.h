@@ -51,6 +51,7 @@
 int16_t fix_fft(int16_t fr[], int16_t fi[], int16_t m, int16_t inverse);
 void fix_fft_cp2m(int16_t *vReal, int16_t *vImag, uint16_t samples);
 void  fix_fft_debias(int16_t *pdSamples, int8_t n);
+void fix_fft_denoise(int16_t *pdSamples, int8_t n, int16_t th);
 void fix_fft_log(int16_t *pdSamples, int8_t n);
 void fix_fft_wnd(int16_t *vData, uint16_t samples, uint8_t windowType=FFT_WIN_TYP_HANN, uint8_t dir=FFT_FORWARD);
 

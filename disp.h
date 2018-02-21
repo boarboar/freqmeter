@@ -28,14 +28,16 @@ class Display {
     //void Process();
     void ShowStatus(char *msg);
     void ShowData(const int16_t d[3], int ndata, int row=0);
-    void ShowChart(const double *pdVals, int16_t nvals, 
-      int16_t y=(320-256), int16_t h=256, int16_t h0=128, int16_t xlab=0);
+    //void ShowChart(const double *pdVals, int16_t nvals, 
+    //  int16_t y=(320-256), int16_t h=256, int16_t h0=128, int16_t xlab=0);
     void ShowChart0(const int16_t *pdVals, int16_t nvals, 
       int16_t y=(320-256), int16_t h=256, int16_t xlab=0, int16_t noise=0);  
-    void ShowChartPlus(const double *pdVals, int16_t nvals, 
-      int16_t y=(320-256), int16_t h=256, int16_t xlab=0, int16_t noise=0);
+    //void ShowChartPlus(const double *pdVals, int16_t nvals, 
+    //  int16_t y=(320-256), int16_t h=256, int16_t xlab=0, int16_t noise=0);
     void ShowChartPlusMax(const int16_t *pdVals, int16_t nvals, 
-      int16_t y=(320-256), int16_t h=256, int16_t xlab=0, int16_t vmax=100, int16_t noise=0);  
+      int16_t y=(320-256), int16_t h=256, int16_t xlab=0, int16_t vmax=100);  
+    void ShowCellChart(const int16_t *pdVals, int16_t nvals, 
+      int16_t y=(320-256), int16_t h=256, int16_t xlab=0, int16_t ncells=8, int16_t vmax=100);    
   protected:
     void BufLen();
     char out_buf[64];

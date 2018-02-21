@@ -443,7 +443,7 @@ void  FFT_Do(int16_t *vReal, int16_t *vImag, boolean doLogTiming) {
     //xDisplay.ShowChart0(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1));    
 
     //xDisplay.ShowChartPlusMax(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 100, NOISE_CUT_OFF);    
-    xDisplay.ShowChartPlusMax(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 25, NOISE_CUT_OFF);    
+    xDisplay.ShowChartPlusMax(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 25);    
     
     if(doLogTiming)
         xLogger.vAddLogMsg("CH1", (int16_t)(xTaskGetTickCount()-xRunTime));  
@@ -459,6 +459,7 @@ void  FFT_ComputeMagnitudeFix(int16_t *vReal, int16_t *vImag) {
     fix_fft(vReal, vImag, LOG2_N_WAVE, 0);  
     fix_fft_cp2m(vReal, vImag, n2);
     vReal[0]/=2; //DC
+    fix_fft_denoise(vReal, n2, NOISE_CUT_OFF);
     fix_fft_log(vReal, n2);
 
   }
