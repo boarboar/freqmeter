@@ -385,7 +385,7 @@ void fix_fft_cp2m(int16_t *vReal, int16_t *vImag, uint16_t samples)
 }
 
 
-void  fix_fft_debias(int16_t *pdSamples, int8_t n) {
+void  fix_fft_debias(int16_t *pdSamples, uint16_t n) {
     int32_t mean = 0;
     uint16_t i;
     int16_t m16;
@@ -398,7 +398,7 @@ void  fix_fft_debias(int16_t *pdSamples, int8_t n) {
     }
   }
 
-void fix_fft_denoise(int16_t *pdSamples, int8_t n, int16_t th) {
+void fix_fft_denoise(int16_t *pdSamples, uint16_t n, int16_t th) {
     uint16_t i;
     for(i=0; i<n; i++) {
         if(pdSamples[i]<th) pdSamples[i]=0;
@@ -408,7 +408,7 @@ void fix_fft_denoise(int16_t *pdSamples, int8_t n, int16_t th) {
 //7 : X:2,5,7,12
 //8 : L:12,18,18,24
 
-void  fix_fft_log(int16_t *pdSamples, int8_t n) {
+void  fix_fft_log(int16_t *pdSamples, uint16_t n) {
     int16_t  value;
     uint16_t  result, i;
     for(i=0; i<n; i++) {
