@@ -230,7 +230,8 @@ void Display::ShowChartPlusMax(const int16_t *pdVals, int16_t nvals,
             tft.fillRect(xp, y0-h, wc, h, ILI9341_RED);
             */
         color = v<h ? ILI9341_GREEN : ILI9341_RED;
-        tft.fillRect(xp, y0-h, wc, h, color);
+        if(v>h) v=h;
+        tft.fillRect(xp, y0-v, wc, v, color);
 
     }
     tft.setTextColor(ILI9341_YELLOW); // transparent
@@ -245,9 +246,9 @@ void Display::ShowChartPlusMax(const int16_t *pdVals, int16_t nvals,
 
 void Display::ShowCellChart(const int16_t *pdVals, int16_t nvals, 
       int16_t y, int16_t h, int16_t xlab, int16_t ncells, int16_t vmax) {
-    int16_t v, y0=y+h, xp;
+    int16_t v, y0=y+h, xp, ip;
     uint16_t i, color;
-    uint8_t w, wc, hc, nc, ic, ip;
+    uint8_t w, wc, hc, nc, ic;
 
     w=DISPLAY_H_SZ/(nvals);
     if(w<=1) return;
@@ -271,9 +272,9 @@ void Display::ShowCellChart(const int16_t *pdVals, int16_t nvals,
             tft.fillRect(xp, y0-h, wc, h, ILI9341_RED);
             */
         nc=v/hc;
-        if(hc>ncells) hc=ncells;
-        ip=y0+h-hc;
-        for(ic=0; ic<ncells; i++) {
+        if(nc>ncells) hc=ncells;
+        ip=y0-hc;
+        for(ic=0; ic<ncells; ic++) {
             color = ic<hc ? ILI9341_GREEN : ILI9341_LIGHTGREY;
             tft.fillRect(xp, ip, wc, hc-1, color);
             ip-=hc;
@@ -289,7 +290,7 @@ void Display::ShowCellChart(const int16_t *pdVals, int16_t nvals,
     itoa(xlab/2, out_buf);
     tft.drawRightString(out_buf, DISPLAY_H_SZ/2, y0, D_FONT_S_SZ);
 }
-    
+      
 
 /*
 static int c=0;
