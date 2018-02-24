@@ -272,10 +272,10 @@ void Display::ShowCellChart(const int16_t *pdVals, int16_t nvals,
             tft.fillRect(xp, y0-h, wc, h, ILI9341_RED);
             */
         nc=v/hc;
-        if(nc>ncells) hc=ncells;
+        if(nc>ncells) nc=ncells;
         ip=y0-hc;
         for(ic=0; ic<ncells; ic++) {
-            color = ic<hc ? ILI9341_GREEN : ILI9341_LIGHTGREY;
+            color = ic<nc ? ILI9341_GREEN : ILI9341_LIGHTGREY;
             tft.fillRect(xp, ip, wc, hc-1, color);
             ip-=hc;
         }
