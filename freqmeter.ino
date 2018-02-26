@@ -403,6 +403,7 @@ void  FFT_StartSampling() {
 
 void  FFT_Do(int16_t *vReal, int16_t *vImag, boolean doLogTiming) {    
     //xLogger.vAddLogMsg("DO");  
+    uint16_t i;
     uint32_t xRunTime=xTaskGetTickCount();
     
     fix_fft_debias(vReal, FFT_SAMPLES);
@@ -421,8 +422,8 @@ void  FFT_Do(int16_t *vReal, int16_t *vImag, boolean doLogTiming) {
       unTime=xTaskGetTickCount();
     */
 
-    for (uint16_t i = 0; i < FFT_SAMPLES; i++) vImag[i] = 0;
-    FFT_ComputeMagnitudeFix(vReal, vImag); 
+    for (i = 0; i < FFT_SAMPLES; i++) vImag[i] = 0;
+    i = FFT_ComputeMagnitudeFix(vReal, vImag); 
 
     //FFT_ComputeMagnitude(vReal, vImag, FFT_SAMPLES); 
 
@@ -444,7 +445,7 @@ void  FFT_Do(int16_t *vReal, int16_t *vImag, boolean doLogTiming) {
 
     //xDisplay.ShowChartPlusMax(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 100, NOISE_CUT_OFF);    
     //xDisplay.ShowChartPlusMax(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 25);    
-    xDisplay.ShowCellChart(vReal, (FFT_SAMPLES>>1), 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 8, 25); 
+    xDisplay.ShowCellChart(vReal, i, 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 8, 25); 
 
     
     if(doLogTiming)
@@ -453,7 +454,7 @@ void  FFT_Do(int16_t *vReal, int16_t *vImag, boolean doLogTiming) {
 }
 
 
-void  FFT_ComputeMagnitudeFix(int16_t *vReal, int16_t *vImag) {
+uint16_t  FFT_ComputeMagnitudeFix(int16_t *vReal, int16_t *vImag) {
     uint16_t n2=FFT_SAMPLES>>1;
     
     //fix_fft_wnd(vReal, FFT_SAMPLES);
@@ -461,9 +462,11 @@ void  FFT_ComputeMagnitudeFix(int16_t *vReal, int16_t *vImag) {
     fix_fft(vReal, vImag, LOG2_N_WAVE, 0);  
     fix_fft_cp2m(vReal, vImag, n2);
     vReal[0]/=2; //DC
+    fix_fft_sq2(vReal, n2);
+    n2>>=1;
     fix_fft_denoise(vReal, n2, NOISE_CUT_OFF);
     fix_fft_log(vReal, n2);
-
+    return n2;
   }
 
 
