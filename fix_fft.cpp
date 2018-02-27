@@ -401,7 +401,7 @@ void  fix_fft_debias(int16_t *pdSamples, uint16_t n) {
 void fix_fft_sq2(int16_t *pdSamples, uint16_t n) {    
     uint16_t i;
     for(i=0; i<(n>>1); i++) {
-        pdSamples[i]=(pdSamples[i]+pdSamples[i+1])>>1;
+        pdSamples[i]=(pdSamples[i*2]+pdSamples[i*2+1])>>1;
     }
 }
 
