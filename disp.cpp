@@ -275,7 +275,7 @@ void Display::ShowCellChart(const int16_t *pdVals, int16_t nvals,
         if(nc>ncells) nc=ncells;
         ip=y0-hc;
         for(ic=0; ic<ncells; ic++) {
-            color = ic<nc ? ILI9341_GREEN : ILI9341_LIGHTGREY;
+            color = ic<nc ? ILI9341_GREEN : ILI9341_DARKGREY;
             tft.fillRect(xp, ip, wc, hc-1, color);
             ip-=hc;
         }

@@ -41,6 +41,7 @@ class Display {
   protected:
     void BufLen();
     char out_buf[64];
+    char chart_cells[64];
     /*
   struct AMessage
   {

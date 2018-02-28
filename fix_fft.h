@@ -24,6 +24,9 @@
 //#define N_WAVE      32    /* full length of Sinewave[] */
 //#define LOG2_N_WAVE 5      /* log2(N_WAVE) */
 
+//#define N_WAVE      64    /* full length of Sinewave[] */
+//#define LOG2_N_WAVE 6      /* log2(N_WAVE) */
+
 #define N_WAVE      128    /* full length of Sinewave[] */
 #define LOG2_N_WAVE 7      /* log2(N_WAVE) */
 

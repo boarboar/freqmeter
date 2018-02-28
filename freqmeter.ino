@@ -98,7 +98,7 @@ static const uint16_t FFT_SAMPLES = N_WAVE;//This value MUST ALWAYS be a power o
 // with sampling at 1000 Hz, we get width 1000/2 = 500 Hz
 // discrete of (1000/2) / (64/2) = 500/32 = 15 Hz
 //double vSamp[FFT_SAMPLES];
-//int16_t  vSamp[FFT_SAMPLES];
+int16_t  vSamp[FFT_SAMPLES];
 int16_t  vReal[FFT_SAMPLES];
 int16_t  vImag[FFT_SAMPLES];  
 
@@ -173,57 +173,6 @@ static void vDispOutTask(void *pvParameters) {
        vTaskDelay(TASK_DELAY_DISP);
     }
 }
-
-/*
-static void vIMU_Task(void *pvParameters) {
-    int16_t mpu_res=0;    
-    TickType_t xLastWakeTime=xTaskGetTickCount();
-    xLogger.vAddLogMsg("IMU Task started.");
-    for (;;) { 
-      vTaskDelay(TASK_DELAY_MPU); 
-      if(MpuDrv::Mpu.Acquire()) {
-        mpu_res = MpuDrv::Mpu.cycle_dt();        
-        //mpu_res = MpuDrv::Mpu.cycle((uint16_t)(xTaskGetTickCount()-xLastWakeTime));        
-        //xLastWakeTime=xTaskGetTickCount();       
-        MpuDrv::Mpu.Release();
-      } else continue;
-      if(mpu_res==2) {
-        // IMU settled
-        fMPUReady=true;
-        if(MpuDrv::Mpu.Acquire()) {
-            MpuDrv::Mpu.FFT_StartSampling();               
-            MpuDrv::Mpu.Release();
-          }
-        xLogger.vAddLogMsg("MPU Ready!");
-        xDisplay.ShowStatus("Ready");
-      }
-    }
-}
-*/
-
-/*
-void vIMU_TimerCallback( TimerHandle_t xTimer )
- {
-    //xLogger.vAddLogMsg("IMU Timer");
-    int16_t mpu_res = -1;
-    if(MpuDrv::Mpu.Acquire()) {
-        //mpu_res = MpuDrv::Mpu.cycle_dt();        
-        mpu_res = MpuDrv::Mpu.cycle(0);     
-        bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
-        MpuDrv::Mpu.Release();
-      } else return;
-      if(mpu_res==2) {
-        // IMU settled
-        fMPUReady=true;
-        if(MpuDrv::Mpu.Acquire()) {
-            MpuDrv::Mpu.FFT_StartSampling();               
-            MpuDrv::Mpu.Release();
-          }
-        xLogger.vAddLogMsg("MPU Ready!");
-        xDisplay.ShowStatus("Ready");
-      }
- }
- */
 
 void vIMU_TimerCallbackInit( TimerHandle_t xTimer )
  {
@@ -462,6 +411,8 @@ uint16_t  FFT_ComputeMagnitudeFix(int16_t *vReal, int16_t *vImag) {
     fix_fft(vReal, vImag, LOG2_N_WAVE, 0);  
     fix_fft_cp2m(vReal, vImag, n2);
     vReal[0]/=2; //DC
+    fix_fft_sq2(vReal, n2);
+    n2>>=1;
     fix_fft_sq2(vReal, n2);
     n2>>=1;
     fix_fft_denoise(vReal, n2, NOISE_CUT_OFF);
