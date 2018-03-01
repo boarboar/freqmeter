@@ -98,12 +98,13 @@ static const uint16_t FFT_SAMPLES = N_WAVE;//This value MUST ALWAYS be a power o
 // with sampling at 1000 Hz, we get width 1000/2 = 500 Hz
 // discrete of (1000/2) / (64/2) = 500/32 = 15 Hz
 //double vSamp[FFT_SAMPLES];
+//double vReal[FFT_SAMPLES];
+//double vImag[FFT_SAMPLES];  
+
 int16_t  vSamp[FFT_SAMPLES];
 int16_t  vReal[FFT_SAMPLES];
 int16_t  vImag[FFT_SAMPLES];  
 
-//double vReal[FFT_SAMPLES];
-//double vImag[FFT_SAMPLES];  
 
 static void vSerialOutTask(void *pvParameters) {
     Serial.println("Serial Out Task started.");
@@ -119,6 +120,7 @@ static void vDispOutTask(void *pvParameters) {
     int16_t a[6]={0,0,0,0,0,0};
     int16_t i;
     //int16_t iOverTimeCount1=0;
+    /*
     {
         // test log
         int16_t x[4]={2, 5, 7, 12};
@@ -126,6 +128,7 @@ static void vDispOutTask(void *pvParameters) {
         fix_fft_log(x, 4);
         xLogger.vAddLogMsg("L", x[0], x[1], x[2], x[3]);
     }
+    */
     TestChart(20); // 20Hz
     vTaskDelay(5000);
     TestChart(50); // 50Hz
@@ -138,8 +141,7 @@ static void vDispOutTask(void *pvParameters) {
     for (;;) {
         if(fMPUReady) {
             bSampReady=false;
-            if(MpuDrv::Mpu.Acquire()) {
-                //bSampReady = MpuDrv::Mpu.FFT_SamplingReady();
+            if(MpuDrv::Mpu.Acquire()) {               
                 bSampReady=fSAMPReady;
                 /*
                 if(bSampReady)
@@ -257,14 +259,6 @@ void setup() {
                 tskIDLE_PRIORITY + 1, // low
                 NULL);
                 
-                /*
-    xTaskCreate(vIMU_Task,
-                "TaskIMU",
-                configMINIMAL_STACK_SIZE,
-                NULL,
-                tskIDLE_PRIORITY + 3, // max
-                NULL);
-*/
 
     xIMU_TimerSMP = xTimerCreate( 
                      "IMU_Timer_SMP",
@@ -420,7 +414,7 @@ uint16_t  FFT_ComputeMagnitudeFix(int16_t *vReal, int16_t *vImag) {
     return n2;
   }
 
-
+/*
 void  FFT_DeBias(double *pdSamples, int8_t n) {
     double mean = 0;
     uint16_t i;
@@ -434,8 +428,8 @@ void  FFT_DeBias(double *pdSamples, int8_t n) {
   }
   
   void  FFT_ComputeMagnitude(double *vReal, double *vImag, int8_t n) {
-    FFT.Compute(vReal, vImag, n, FFT_FORWARD); /* Compute FFT */    
-    FFT.ComplexToMagnitude(vReal, vImag, n/2); /* Compute magnitudes */  
+    FFT.Compute(vReal, vImag, n, FFT_FORWARD); // Compute FFT 
+    FFT.ComplexToMagnitude(vReal, vImag, n/2); // Compute magnitudes 
     vReal[0]/=n; // DC
     uint16_t i, n2=n>>1;
     for(i=1; i<n2; i++) {
@@ -452,3 +446,5 @@ void  FFT_Log(double *pdSamples, int8_t n) {
             pdSamples[i]=0.0;
     }
   }
+
+*/
