@@ -14,6 +14,8 @@
 #define D_FONT_S_SZ 2
 #define D_FONT_S_H  16
 
+#define CHART_CELL_COLS 64
+
 class Display {  
   public:
     void Init();    
@@ -41,7 +43,7 @@ class Display {
   protected:
     void BufLen();
     char out_buf[64];
-    char chart_cells[64];
+    uint8_t chart_cells[CHART_CELL_COLS];
     /*
   struct AMessage
   {

@@ -64,6 +64,8 @@ void Display::Init() {
       tft.fillRect(i*(w), DISPLAY_V_SZ-h-1, w-1, h, (i%10==0 ? ILI9341_GREEN : ILI9341_RED));
     }
     */
+
+    memset(chart_cells, 0, CHART_CELL_COLS);
 }
 
 
@@ -248,7 +250,9 @@ void Display::ShowCellChart(const int16_t *pdVals, int16_t nvals,
       int16_t y, int16_t h, int16_t xlab, int16_t ncells, int16_t vmax) {
     int16_t v, y0=y+h, xp, ip;
     uint16_t i, color;
-    uint8_t w, wc, hc, nc, ic;
+    uint8_t w, wc, hc, nc, ic, d, sc;
+
+    if(nvals>CHART_CELL_COLS) return;
 
     w=DISPLAY_H_SZ/(nvals);
     if(w<=1) return;
@@ -258,26 +262,39 @@ void Display::ShowCellChart(const int16_t *pdVals, int16_t nvals,
 
     hc=h/ncells;
     if(hc<2) return;
-
-    //tft.fillRect(0, y, DISPLAY_H_SZ-1, h, ILI9341_BLACK);
     xp=0;
     for(i=0; i<nvals && xp+wc<DISPLAY_H_SZ; i++) {
         v=(int16_t)pdVals[i];      
         v=(int16_t)( ((uint32_t)v)*h / ((int32_t)vmax) );
         xp+=w;
-        /*
-        if(v<h)
-            tft.fillRect(xp, y0-v, wc, v, ILI9341_GREEN);
-        else    
-            tft.fillRect(xp, y0-h, wc, h, ILI9341_RED);
-            */
+
         nc=v/hc;
         if(nc>ncells) nc=ncells;
-        ip=y0-hc;
-        for(ic=0; ic<ncells; ic++) {
-            color = ic<nc ? ILI9341_GREEN : ILI9341_DARKGREY;
-            tft.fillRect(xp, ip, wc, hc-1, color);
-            ip-=hc;
+        
+        if(chart_cells[i]!=nc) {
+            if(chart_cells[i]>nc) {
+                sc=nc;
+                d=chart_cells[i]-nc;
+                color=ILI9341_DARKGREY;                
+            } else {
+                sc=chart_cells[i];
+                d=nc-chart_cells[i];
+                color=ILI9341_GREEN;
+            }
+            /*
+            ip=y0-hc;
+            for(ic=0; ic<ncells; ic++) {
+                color = ic<nc ? ILI9341_GREEN : ILI9341_DARKGREY;
+                tft.fillRect(xp, ip, wc, hc-1, color);
+                ip-=hc;
+            }
+            */
+            ip=y0-hc*sc;
+            for(ic=0; ic<d; ic++) {                
+                tft.fillRect(xp, ip, wc, hc-1, color);
+                ip-=hc;
+            }
+        chart_cells[i]=nc;
         }
 
     }
