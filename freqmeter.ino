@@ -101,9 +101,9 @@ static const uint16_t FFT_SAMPLES = N_WAVE;//This value MUST ALWAYS be a power o
 //double vReal[FFT_SAMPLES];
 //double vImag[FFT_SAMPLES];  
 
-int16_t  vSamp[FFT_SAMPLES];
-int16_t  vReal[FFT_SAMPLES];
-int16_t  vImag[FFT_SAMPLES];  
+int16_t  vSamp[FFT_SAMPLES]={0};
+int16_t  vReal[FFT_SAMPLES]={0};
+int16_t  vImag[FFT_SAMPLES]={0};  
 
 
 static void vSerialOutTask(void *pvParameters) {
@@ -143,10 +143,10 @@ static void vDispOutTask(void *pvParameters) {
             bSampReady=false;
             if(MpuDrv::Mpu.Acquire()) {               
                 bSampReady=fSAMPReady;
-                /*
+            
                 if(bSampReady)
                     for(i=0; i<FFT_SAMPLES; i++) vReal[i]=vSamp[i];
-                 */
+                 
 
                 /*
                 a[0] = MpuDrv::Mpu.FFT_GetDataSampCount();
@@ -165,8 +165,9 @@ static void vDispOutTask(void *pvParameters) {
             if(bSampReady) {             
                 //xLogger.vAddLogMsg("DSP SMP  Ready!");
                 xDisplay.ShowData(a, 3);
-                FFT_Do(vReal, vImag, false);
                 FFT_StartSampling();                
+                FFT_Do(vReal, vImag, false);
+                //FFT_StartSampling();                
             }
         }
         else {                        
@@ -239,8 +240,10 @@ void setup() {
     //Wire.begin(SCL_PIN, SDA_PIN);
     Wire.begin();
     MpuDrv::Mpu.init();
-    //MpuDrv::Mpu.FFT_SetSampling(vSamp, FFT_SAMPLES);
-    MpuDrv::Mpu.FFT_SetSampling(vReal, FFT_SAMPLES);
+    MpuDrv::Mpu.FFT_SetSampling(vSamp, FFT_SAMPLES);
+    //MpuDrv::Mpu.FFT_SetSampling(vReal, FFT_SAMPLES);
+
+    //xDisplay.ShowCellChart(vReal, i, 320-128-D_FONT_S_H, 128, ((1000/TASK_DELAY_MPU)>>1), 8, 25);  // init chart bg
 
     Serial.println("Starting...");
     digitalWrite(BOARD_LED_PIN, HIGH);

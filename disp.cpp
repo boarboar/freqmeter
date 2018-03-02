@@ -65,7 +65,7 @@ void Display::Init() {
     }
     */
 
-    memset(chart_cells, 0, CHART_CELL_COLS);
+    memset(chart_cells, 8, CHART_CELL_COLS);
 }
 
 
@@ -266,16 +266,16 @@ void Display::ShowCellChart(const int16_t *pdVals, int16_t nvals,
     for(i=0; i<nvals && xp+wc<DISPLAY_H_SZ; i++) {
         v=(int16_t)pdVals[i];      
         v=(int16_t)( ((uint32_t)v)*h / ((int32_t)vmax) );
-        xp+=w;
-
         nc=v/hc;
         if(nc>ncells) nc=ncells;
+        
+        xp+=w;
         
         if(chart_cells[i]!=nc) {
             if(chart_cells[i]>nc) {
                 sc=nc;
                 d=chart_cells[i]-nc;
-                color=ILI9341_DARKGREY;                
+                color=ILI9341_BLACK;                
             } else {
                 sc=chart_cells[i];
                 d=nc-chart_cells[i];
@@ -294,7 +294,7 @@ void Display::ShowCellChart(const int16_t *pdVals, int16_t nvals,
                 tft.fillRect(xp, ip, wc, hc-1, color);
                 ip-=hc;
             }
-        chart_cells[i]=nc;
+            chart_cells[i]=nc;
         }
 
     }
