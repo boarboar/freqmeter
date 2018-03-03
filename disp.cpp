@@ -65,7 +65,7 @@ void Display::Init() {
     }
     */
 
-    memset(chart_cells, 8, CHART_CELL_COLS);
+    memset(chart_cells, 0, CHART_CELL_COLS);
 }
 
 

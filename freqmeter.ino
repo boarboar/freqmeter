@@ -165,9 +165,9 @@ static void vDispOutTask(void *pvParameters) {
             if(bSampReady) {             
                 //xLogger.vAddLogMsg("DSP SMP  Ready!");
                 xDisplay.ShowData(a, 3);
-                FFT_StartSampling();                
-                FFT_Do(vReal, vImag, false);
                 //FFT_StartSampling();                
+                FFT_Do(vReal, vImag, false);
+                FFT_StartSampling();                
             }
         }
         else {                        
