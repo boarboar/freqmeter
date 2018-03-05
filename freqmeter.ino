@@ -163,11 +163,12 @@ static void vDispOutTask(void *pvParameters) {
            } 
            
             if(bSampReady) {             
-                //xLogger.vAddLogMsg("DSP SMP  Ready!");
+                xLogger.vAddLogMsg("DRAW+++");
                 xDisplay.ShowData(a, 3);
                 //FFT_StartSampling();                
                 FFT_Do(vReal, vImag, false);
-                FFT_StartSampling();                
+                FFT_StartSampling();          
+                xLogger.vAddLogMsg("DRAW---");      
             }
         }
         else {                        
@@ -215,7 +216,10 @@ void vIMU_TimerCallbackSample( TimerHandle_t xTimer )
         //xLogger.vAddLogMsg("Sample Ready!");
         //xDisplay.ShowStatus("Sample Ready");
         if(MpuDrv::Mpu.Acquire()) {
-          fSAMPReady=true;
+          if(!fSAMPReady) { 
+            xLogger.vAddLogMsg("SMP!!!");  
+            fSAMPReady=true;
+            }
           MpuDrv::Mpu.Release();
         }
     }
