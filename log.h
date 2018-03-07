@@ -23,6 +23,8 @@ class ComLogger {
   struct AMessage rxMessage;
   QueueHandle_t xLogQueue;
   xSemaphoreHandle xLogFree;
+  TickType_t xLastWakeTime;
+  uint16_t nIn, nOut, nFails;
 };
 
 void itoa(int n, char s[]);

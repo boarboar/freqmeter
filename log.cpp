@@ -15,7 +15,9 @@ void ComLogger::Init() {
 
     txMessage.ucMessageID=0;
     txMessage.ucData[0]=0;
-    
+    nFails = nIn = nOut = 0;
+    xLastWakeTime = xTaskGetTickCount();
+
     Serial.println("Logger OK");
 }
 
@@ -26,7 +28,9 @@ void ComLogger::vAddLogMsg(const char *pucMsg) {
       if(pucMsg) 
         strncpy(txMessage.ucData, pucMsg, CLOG_MSG_SZ);          
       else *txMessage.ucData=0;  
-      xQueueSendToBack( xLogQueue, ( void * ) &txMessage, ( TickType_t ) 0 );          
+      if(xQueueSendToBack( xLogQueue, ( void * ) &txMessage, ( TickType_t ) 0 ) != pdPASS ) {
+        nFails++;
+      } else nIn++;
       xSemaphoreGive( xLogFree );
     }
 }
@@ -40,7 +44,9 @@ void ComLogger::vAddLogMsg(const char *pucMsg, int16_t i) {
       else *txMessage.ucData=0;        
       strncat(txMessage.ucData, ":", CLOG_MSG_SZ);          
       itoa_cat(i, txMessage.ucData);
-      xQueueSendToBack( xLogQueue, ( void * ) &txMessage, ( TickType_t ) 0 );          
+      if(xQueueSendToBack( xLogQueue, ( void * ) &txMessage, ( TickType_t ) 0 ) != pdPASS ) {
+        nFails++;
+      } else nIn++;
       xSemaphoreGive( xLogFree );
     }
 }
@@ -61,7 +67,9 @@ void ComLogger::vAddLogMsg(const char *pucMsg1, int16_t i1, const char *pucMsg2,
       strncat(txMessage.ucData, ":", CLOG_MSG_SZ);          
       itoa_cat(i2, txMessage.ucData);
       
-      xQueueSendToBack( xLogQueue, ( void * ) &txMessage, ( TickType_t ) 0 );          
+      if(xQueueSendToBack( xLogQueue, ( void * ) &txMessage, ( TickType_t ) 0 ) != pdPASS ) {
+        nFails++;
+      } else nIn++;
       xSemaphoreGive( xLogFree );
     }
 }
@@ -101,7 +109,9 @@ void ComLogger::vAddLogMsg(const char *pucMsg1, int32_t i1, int32_t i2, int32_t 
       strncat(txMessage.ucData, ",", CLOG_MSG_SZ);          
       ltoa_cat(i3, txMessage.ucData);
       
-      xQueueSendToBack( xLogQueue, ( void * ) &txMessage, ( TickType_t ) 0 );          
+      if(xQueueSendToBack( xLogQueue, ( void * ) &txMessage, ( TickType_t ) 0 ) != pdPASS ) {
+        nFails++;
+      } else nIn++;
       xSemaphoreGive( xLogFree );
     }
 }
@@ -121,7 +131,9 @@ void ComLogger::vAddLogMsg(const char *pucMsg1, int32_t i1, int32_t i2, int32_t 
       ltoa_cat(i3, txMessage.ucData);
       strncat(txMessage.ucData, ",", CLOG_MSG_SZ);          
       ltoa_cat(i4, txMessage.ucData);      
-      xQueueSendToBack( xLogQueue, ( void * ) &txMessage, ( TickType_t ) 0 );          
+      if(xQueueSendToBack( xLogQueue, ( void * ) &txMessage, ( TickType_t ) 0 ) != pdPASS ) {
+        nFails++;
+      } else nIn++;
       xSemaphoreGive( xLogFree );
     }
 }
@@ -131,8 +143,18 @@ void ComLogger::Process() {
     Serial.print((int)rxMessage.ucMessageID);
     Serial.print(" : ");
     Serial.println(rxMessage.ucData);
-    vTaskDelay(100);         
+    nOut++;
+    vTaskDelay(10);         
    }        
+  if ((int16_t)(xTaskGetTickCount()-xLastWakeTime)>5000) {
+    Serial.print("* SS: ");
+    Serial.print(nIn);
+    Serial.print(", ");
+    Serial.print(nOut);
+    Serial.print(", ");
+    Serial.println(nFails);
+    xLastWakeTime = xTaskGetTickCount();
+  }
 }
 
 

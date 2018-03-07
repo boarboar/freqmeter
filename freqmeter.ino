@@ -256,7 +256,7 @@ void setup() {
                 "TaskSO",
                 configMINIMAL_STACK_SIZE,
                 NULL,
-                tskIDLE_PRIORITY + 1, // low
+                tskIDLE_PRIORITY + 2, // low
                 NULL);
 
     xTaskCreate(vDispOutTask,
