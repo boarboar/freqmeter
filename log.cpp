@@ -144,7 +144,7 @@ void ComLogger::Process() {
     Serial.print(" : ");
     Serial.println(rxMessage.ucData);
     nOut++;
-    vTaskDelay(10);         
+    vTaskDelay(5);         
    }        
   if ((int16_t)(xTaskGetTickCount()-xLastWakeTime)>5000) {
     Serial.print("* SS: ");

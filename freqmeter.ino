@@ -144,10 +144,10 @@ static void vDispOutTask(void *pvParameters) {
             if(MpuDrv::Mpu.Acquire()) {               
                 bSampReady=fSAMPReady;
             
-                if(bSampReady)
-                    for(i=0; i<FFT_SAMPLES; i++) vReal[i]=vSamp[i];
-                 
-
+                if(bSampReady) {
+                    //xLogger.vAddLogMsg("GET!!!"); 
+                    for(i=0; i<FFT_SAMPLES; i++) vReal[i]=vSamp[i];                
+                }
                 /*
                 a[0] = MpuDrv::Mpu.FFT_GetDataSampCount();
                 a[1] = MpuDrv::Mpu.FFT_GetOverTimeCount1();
@@ -163,12 +163,12 @@ static void vDispOutTask(void *pvParameters) {
            } 
            
             if(bSampReady) {             
-                xLogger.vAddLogMsg("DRAW+++");
+                //xLogger.vAddLogMsg("DRAW+++");
                 xDisplay.ShowData(a, 3);
                 //FFT_StartSampling();                
                 FFT_Do(vReal, vImag, false);
                 FFT_StartSampling();          
-                xLogger.vAddLogMsg("DRAW---");      
+                //xLogger.vAddLogMsg("DRAW---");      
             }
         }
         else {                        
@@ -217,7 +217,7 @@ void vIMU_TimerCallbackSample( TimerHandle_t xTimer )
         //xDisplay.ShowStatus("Sample Ready");
         if(MpuDrv::Mpu.Acquire()) {
           if(!fSAMPReady) { 
-            xLogger.vAddLogMsg("SMP!!!");  
+            //xLogger.vAddLogMsg("SMP!!!");  
             fSAMPReady=true;
             }
           MpuDrv::Mpu.Release();
@@ -256,7 +256,7 @@ void setup() {
                 "TaskSO",
                 configMINIMAL_STACK_SIZE,
                 NULL,
-                tskIDLE_PRIORITY + 2, // low
+                tskIDLE_PRIORITY + 1, // low
                 NULL);
 
     xTaskCreate(vDispOutTask,
